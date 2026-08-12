@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSight AI | Indian Banking Market Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="error-banner" class="banner error hidden">
+        LIVE MARKET DATA UNAVAILABLE — Market-data provider is currently offline or rate-limited.
+    </div>
+
+    <header>
+        <div class="logo">
+            <h1>BankSight <span>AI</span></h1>
+            <p>Explainable Indian Banking Market Intelligence</p>
+        </div>
+        <div class="status-panel">
+            <div class="status-item">Source: <span id="data-source-text" style="font-weight:700;">Yahoo Finance</span></div>
+            <div class="status-item">Market: <span class="dot" id="status-market-open"></span><span id="market-status-text" style="font-weight:700;">--</span></div>
+            <div class="status-item"><span class="dot" id="status-market"></span>Market Data</div>
+            <div class="status-item"><span class="dot" id="status-news"></span>News</div>
+            <div class="status-item"><span class="dot" id="status-model"></span>Model</div>
+            <div class="status-time">Last Update: <span id="last-update-time">--:--:--</span></div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Market Overview -->
+        <section class="overview">
+            <div class="market-card">
+                <h3>NIFTY 50</h3>
+                <div class="val" id="nifty-val">--</div>
+                <div class="change" id="nifty-change">--</div>
+            </div>
+            <div class="market-card">
+                <h3>BANK NIFTY</h3>
+                <div class="val" id="banknifty-val">--</div>
+                <div class="change" id="banknifty-change">--</div>
+            </div>
+            <div class="market-card">
+                <h3>INDIA VIX</h3>
+                <div class="val" id="vix-val">--</div>
+                <div class="change" id="vix-change">--</div>
+            </div>
+        </section>
+
+        <div class="main-grid">
+            <!-- Left Column: Bank List -->
+            <div class="col-left">
+                <h2>Top Banks</h2>
+                <div id="bank-list" class="bank-list">
+                    <!-- JS populated -->
+                    <div class="loading">Loading banks...</div>
+                </div>
+                
+                <div class="alert-subscription-box" style="margin-top: 25px; padding: 15px; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color);">
+                    <h3 style="margin-top: 0; font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;">Daily Price Alerts</h3>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Get notified immediately when prices are forecasted to increase.</p>
+                    <form id="subscribe-form" style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="email" id="subscribe-email" placeholder="name@example.com" required style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.82rem;">
+                        <button type="submit" id="subscribe-btn" class="btn btn-secondary" style="font-size: 0.82rem; padding: 8px;">Subscribe Alerts</button>
+                    </form>
+                    <div id="subscribe-status" style="font-size: 0.75rem; margin-top: 6px; text-align: center;" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Detail & Chart -->
+            <div class="col-main">
+                <div class="detail-header">
+                    <div>
+                        <h2 id="detail-name">Select a Bank</h2>
+                        <div id="detail-ticker" class="ticker-label"></div>
+                    </div>
+                    <div class="detail-price-box" style="display: flex; align-items: center; gap: 15px;">
+                        <div class="detail-price" id="detail-price">--</div>
+                        <div class="report-actions" style="display: flex; gap: 8px;">
+                            <button id="download-report-btn" class="btn btn-primary" style="padding: 8px 12px; font-size: 0.82rem;" disabled>
+                                <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download
+                            </button>
+                            <button id="email-report-btn" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.82rem;" disabled>
+                                <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                Email Me
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-summary-bar">
+                    <span class="price-item">Open: <span id="summary-open" class="price-val">--</span></span>
+                    <span class="price-item">Close: <span id="summary-close" class="price-val">--</span></span>
+                    <span class="price-item">High: <span id="summary-high" class="price-val">--</span></span>
+                    <span class="price-item">Low: <span id="summary-low" class="price-val">--</span></span>
+                </div>
+
+                <div class="forecast-cards">
+                    <div class="f-card" id="f-card-1d">
+                        <div class="f-label">1D Forecast</div>
+                        <div class="f-price" id="detail-f1d-price">--</div>
+                        <div class="f-ret" id="detail-f1d-ret">--</div>
+                        <div class="f-conf" id="detail-f1d-conf">--</div>
+                    </div>
+                    <div class="f-card" id="f-card-3d">
+                        <div class="f-label">3D Forecast</div>
+                        <div class="f-price" id="detail-f3d-price">--</div>
+                        <div class="f-ret" id="detail-f3d-ret">--</div>
+                        <div class="f-conf" id="detail-f3d-conf">--</div>
+                    </div>
+                    <div class="f-card" id="f-card-5d">
+                        <div class="f-label">5D Forecast</div>
+                        <div class="f-price" id="detail-f5d-price">--</div>
+                        <div class="f-ret" id="detail-f5d-ret">--</div>
+                        <div class="f-conf" id="detail-f5d-conf">--</div>
+                    </div>
+                    <div class="f-card" id="f-card-7d">
+                        <div class="f-label">7D Forecast</div>
+                        <div class="f-price" id="detail-f7d-price">--</div>
+                        <div class="f-ret" id="detail-f7d-ret">--</div>
+                        <div class="f-conf" id="detail-f7d-conf">--</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Column: Explanations -->
+            <div class="col-right">
+                <!-- Forensic Side Panel (Default Hidden) -->
+                <div id="forensic-panel" class="panel hidden">
+                    <div class="panel-header">
+                        <h2>Candle Forensic Attribution</h2>
+                        <button id="close-forensic-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div class="forensic-body">
+                        <div class="forensic-section">
+                            <h3>Target Reference Date: <span id="forensic-date">--</span></h3>
+                            <div class="forensic-ohlcv-grid">
+                                <div>Open: <span id="forensic-open">--</span></div>
+                                <div>Close: <span id="forensic-close">--</span></div>
+                                <div>High: <span id="forensic-high">--</span></div>
+                                <div>Low: <span id="forensic-low">--</span></div>
+                                <div>Volume: <span id="forensic-volume">--</span></div>
+                            </div>
+                        </div>
+                        <div class="forensic-section">
+                            <h3>Market & Sector Context</h3>
+                            <div id="forensic-market-context">--</div>
+                        </div>
+                        <div class="forensic-section">
+                            <h3>Technical Attributions</h3>
+                            <ul id="forensic-tech-list">
+                                <!-- JS populated -->
+                            </ul>
+                        </div>
+                        <div class="forensic-section">
+                            <h3>Causal News Headlines</h3>
+                            <div id="forensic-news-list">
+                                <!-- JS populated -->
+                            </div>
+                        </div>
+                        <div class="forensic-section">
+                            <h3>Historical Similar Situations</h3>
+                            <div id="forensic-similarity-stats">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Why? <span class="subtitle">Model Explanation</span></h2>
+                    <div id="shap-container" class="shap-list">
+                        <div class="placeholder">Select a bank to view explanation</div>
+                    </div>
+                    <div id="narrative-container" class="narrative"></div>
+                </div>
+
+                <div class="panel">
+                    <h2>News Intelligence</h2>
+                    <div id="news-list" class="news-list">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Historical Similarity</h2>
+                    <div id="events-container" class="events-container">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div>Model Performance: <span id="perf-metrics">MAE: -- | Dir Acc: --</span></div>
+        <div>BankSight AI &copy; 2026. For research purposes only. Not financial advice.</div>
+    </footer>
+
+    <!-- Email Report Modal -->
+    <div id="email-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Email Research Report</h2>
+                <button id="close-email-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:15px;line-height:1.4;">Enter your email to receive this stock intelligence report as an attachment in your inbox.</p>
+                <form id="email-report-form">
+                    <div style="margin-bottom:15px;">
+                        <label for="report-email" style="display:block;font-size:0.75rem;font-weight:600;margin-bottom:4px;color:var(--text-color);">Email Address</label>
+                        <input type="email" id="report-email" placeholder="name@example.com" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;box-sizing:border-box;font-size:0.85rem;">
+                    </div>
+                    
+                    <!-- Captcha Box -->
+                    <div class="captcha-box" style="border:1px solid #d3d3d3;border-radius:3px;background:#f9f9f9;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                        <div class="captcha-row" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <input type="checkbox" id="captcha-checkbox" style="width:24px;height:24px;cursor:pointer;">
+                                <label for="captcha-checkbox" style="font-size:0.85rem;font-weight:600;color:#333;cursor:pointer;">I am not a robot</label>
+                            </div>
+                            <div class="captcha-logo" style="text-align:center;">
+                                <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" style="width:24px;height:24px;">
+                                <div style="font-size:8px;color:#9b9b9b;margin-top:2px;">reCAPTCHA</div>
+                            </div>
+                        </div>
+                        <div id="captcha-challenge-box" class="hidden" style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:8px;">
+                            <p style="font-size:0.8rem;margin:0 0 6px 0;font-weight:600;color:var(--text-color);">Verify you are human: What is <span id="captcha-question" style="color:#2563eb;font-weight:bold;">5 + 4</span>?</p>
+                            <input type="number" id="captcha-answer" placeholder="Your answer" style="width:100%;padding:6px;border-radius:4px;border:1px solid #cbd5e1;box-sizing:border-box;font-size:0.85rem;">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submit-email-report-btn" class="btn btn-primary" style="width:100%;margin-top:15px;padding:10px;" disabled>Send Report</button>
+                    <div id="email-report-status" style="font-size:0.75rem;margin-top:8px;text-align:center;" class="hidden"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
