@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BankSight AI | Indian Banking Market Intelligence</title>
+    <title>BankSight AI | Explainable Indian Banking Intelligence Terminal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -16,55 +16,89 @@
         LIVE MARKET DATA UNAVAILABLE — Market-data provider is currently offline or rate-limited.
     </div>
 
+    <!-- Header Navigation -->
     <header>
-        <div class="logo">
-            <h1>BankSight <span>AI</span></h1>
-            <p>Explainable Indian Banking Market Intelligence</p>
-        </div>
-        <div class="status-panel">
-            <div class="status-item">Source: <span id="data-source-text" style="font-weight:700;">Yahoo Finance</span></div>
-            <div class="status-item">Market: <span class="dot" id="status-market-open"></span><span id="market-status-text" style="font-weight:700;">--</span></div>
-            <div class="status-item"><span class="dot" id="status-market"></span>Market Data</div>
-            <div class="status-item"><span class="dot" id="status-news"></span>News</div>
-            <div class="status-item"><span class="dot" id="status-model"></span>Model</div>
-            <div class="status-item" id="backend-status-item" style="cursor: pointer; background: rgba(37,99,235,0.06); padding: 3px 8px; border-radius: 6px; border: 1px solid #cbd5e1;" title="Click to configure Render backend URL or test SMTP">
-                <span class="dot" id="status-backend"></span>Backend: <span id="backend-label" style="font-weight:600;">Connecting</span> ⚙️
+        <a href="/" class="logo">
+            <div class="logo-icon">BS</div>
+            <div>
+                <h1>BankSight <span>AI</span></h1>
+                <p>Explainable Indian Banking Market Intelligence</p>
             </div>
-            <div class="status-time">Last Update: <span id="last-update-time">--:--:--</span></div>
+        </a>
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="dot green"></span>
+                <span>Source: <strong id="data-source-text">Yahoo Finance</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="dot pulsing-dot" id="status-market-open"></span>
+                <span>Market: <strong id="market-status-text">--</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="dot" id="status-market"></span>
+                <span>Market Data</span>
+            </div>
+            <div class="status-item">
+                <span class="dot" id="status-news"></span>
+                <span>News</span>
+            </div>
+            <div class="status-item">
+                <span class="dot" id="status-model"></span>
+                <span>Model</span>
+            </div>
+            <div class="status-item" id="backend-status-item" style="cursor: pointer;" title="Configure Render backend API URL or test SMTP">
+                <span class="dot" id="status-backend"></span>
+                <span>Backend: <strong id="backend-label">Connecting</strong> ⚙️</span>
+            </div>
+            <a href="/manual" class="btn-nav-manual" target="_blank" title="View Complete User Manual & Technical Architecture Guide">
+                <span>📖 User Manual</span>
+            </a>
+            <button class="theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">🌙</button>
+            <div class="status-time">IST: <span id="last-update-time">--:--:--</span></div>
         </div>
     </header>
 
     <main>
-        <!-- Market Overview -->
+        <!-- Market Overview (Nifty, Bank Nifty, India VIX) -->
         <section class="overview">
-            <div class="market-card">
-                <h3>NIFTY 50</h3>
+            <div class="market-card mc-nifty">
+                <div class="market-card-head">
+                    <h3>NIFTY 50</h3>
+                    <span class="mc-pill">BENCHMARK</span>
+                </div>
                 <div class="val" id="nifty-val">--</div>
                 <div class="change" id="nifty-change">--</div>
             </div>
-            <div class="market-card">
-                <h3>BANK NIFTY</h3>
+            <div class="market-card mc-banknifty">
+                <div class="market-card-head">
+                    <h3>BANK NIFTY</h3>
+                    <span class="mc-pill">SECTORAL</span>
+                </div>
                 <div class="val" id="banknifty-val">--</div>
                 <div class="change" id="banknifty-change">--</div>
             </div>
-            <div class="market-card">
-                <h3>INDIA VIX</h3>
+            <div class="market-card mc-vix">
+                <div class="market-card-head">
+                    <h3>INDIA VIX</h3>
+                    <span class="mc-pill">VOLATILITY</span>
+                </div>
                 <div class="val" id="vix-val">--</div>
                 <div class="change" id="vix-change">--</div>
             </div>
         </section>
 
         <div class="main-grid">
-            <!-- Left Column: Bank Universe -->
+            <!-- Left Column: Bank Universe Directory -->
             <div class="col-left">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h2 style="margin: 0; font-size: 1.1rem;">Banking Universe</h2>
-                    <span id="bank-count-pill" style="font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px;">27 Listed Banks</span>
+                    <h2>Banking Universe</h2>
+                    <span id="bank-count-pill" class="mc-pill" style="color: var(--accent); border-color: var(--accent-glow);">27 Listed Banks</span>
                 </div>
                 
                 <div class="bank-controls">
                     <div class="bank-search-bar">
-                        <input type="text" id="bank-search-input" class="bank-search-input" placeholder="🔍 Search by name or ticker (e.g. Canara, PNB)...">
+                        <svg class="search-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="bank-search-input" class="bank-search-input" placeholder="Search bank or ticker (e.g. SBI, HDFC, Canara)...">
                     </div>
                     <div class="bank-filter-tabs">
                         <button type="button" class="filter-pill active" data-filter="all">All (27)</button>
@@ -76,141 +110,192 @@
                 </div>
 
                 <div id="bank-list" class="bank-list">
-                    <!-- JS populated -->
-                    <div class="loading">Loading banks...</div>
+                    <div class="placeholder">Loading banking universe...</div>
                 </div>
                 
-                <div class="alert-subscription-box" style="margin-top: 25px; padding: 15px; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color);">
-                    <h3 style="margin-top: 0; font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;">Daily Price Alerts</h3>
-                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Get notified immediately when prices are forecasted to increase.</p>
+                <!-- Daily Price Alerts Box -->
+                <div class="alert-subscription-box">
+                    <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <span>🔔</span> Daily Market Briefings
+                    </h3>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                        Get automated morning research briefings sent to your inbox whenever high-conviction bullish setups are detected.
+                    </p>
                     <form id="subscribe-form" style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="email" id="subscribe-email" placeholder="name@example.com" required style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.82rem;">
-                        <button type="submit" id="subscribe-btn" class="btn btn-secondary" style="font-size: 0.82rem; padding: 8px;">Subscribe Alerts</button>
+                        <input type="email" id="subscribe-email" class="bank-search-input" placeholder="name@domain.com" required style="padding: 8px 12px;">
+                        <button type="submit" id="subscribe-btn" class="btn btn-primary" style="justify-content: center; width: 100%;">
+                            Subscribe Alerts
+                        </button>
                     </form>
-                    <div id="subscribe-status" style="font-size: 0.75rem; margin-top: 6px; text-align: center;" class="hidden"></div>
+                    <div id="subscribe-status" style="font-size: 0.75rem; margin-top: 8px; text-align: center;" class="hidden"></div>
                 </div>
             </div>
 
-            <!-- Middle Column: Detail & Chart -->
+            <!-- Middle Column: Detail View, Multi-Horizon Forecasts & Interactive Chart -->
             <div class="col-main">
                 <div class="detail-header">
                     <div>
-                        <h2 id="detail-name">Select a Bank</h2>
-                        <div id="detail-ticker" class="ticker-label"></div>
+                        <div class="bank-title-row">
+                            <div id="detail-avatar" class="bank-avatar avatar-nifty">--</div>
+                            <h2 id="detail-name">Select a Bank</h2>
+                        </div>
+                        <div id="detail-ticker" class="ticker-label">--.NS</div>
                     </div>
-                    <div class="detail-price-box" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="detail-price-box">
                         <div class="detail-price" id="detail-price">--</div>
-                        <div class="report-actions" style="display: flex; gap: 8px;">
-                            <button id="download-report-btn" class="btn btn-primary" style="padding: 8px 12px; font-size: 0.82rem;" disabled>
-                                <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download
+                        <div class="report-actions">
+                            <button id="download-report-btn" class="btn btn-primary" disabled title="Generate publication-grade PDF intelligence report">
+                                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download PDF
                             </button>
-                            <button id="email-report-btn" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.82rem;" disabled>
-                                <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                                Email Me
+                            <button id="email-report-btn" class="btn btn-secondary" disabled title="Email research report to your inbox">
+                                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                Email Report
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="price-summary-bar">
-                    <span class="price-item">Open: <span id="summary-open" class="price-val">--</span></span>
-                    <span class="price-item">Close: <span id="summary-close" class="price-val">--</span></span>
-                    <span class="price-item">High: <span id="summary-high" class="price-val">--</span></span>
-                    <span class="price-item">Low: <span id="summary-low" class="price-val">--</span></span>
+                    <div class="price-item">Open: <span id="summary-open" class="price-val">--</span></div>
+                    <div class="price-item">High: <span id="summary-high" class="price-val">--</span></div>
+                    <div class="price-item">Low: <span id="summary-low" class="price-val">--</span></div>
+                    <div class="price-item">Close: <span id="summary-close" class="price-val">--</span></div>
                 </div>
 
+                <!-- 4 Multi-Horizon Forecast Cards (Clickable for Deep-Dive Explainability) -->
                 <div class="forecast-cards">
-                    <div class="f-card" id="f-card-1d">
-                        <div class="f-label">1D Forecast</div>
+                    <div class="f-card active-horizon" id="f-card-1d" data-horizon="1d" title="Click to inspect 1-Day AI Explainability Decomposition">
+                        <div class="f-label"><span>⚡</span> 1D Forecast</div>
                         <div class="f-price" id="detail-f1d-price">--</div>
                         <div class="f-ret" id="detail-f1d-ret">--</div>
-                        <div class="f-conf" id="detail-f1d-conf">--</div>
+                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f1d-bar" style="width: 0%;"></div></div>
+                        <div class="f-conf" id="detail-f1d-conf">Conf: --%</div>
+                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
                     </div>
-                    <div class="f-card" id="f-card-3d">
-                        <div class="f-label">3D Forecast</div>
+                    <div class="f-card" id="f-card-3d" data-horizon="3d" title="Click to inspect 3-Day AI Explainability Decomposition">
+                        <div class="f-label"><span>📈</span> 3D Forecast</div>
                         <div class="f-price" id="detail-f3d-price">--</div>
                         <div class="f-ret" id="detail-f3d-ret">--</div>
-                        <div class="f-conf" id="detail-f3d-conf">--</div>
+                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f3d-bar" style="width: 0%;"></div></div>
+                        <div class="f-conf" id="detail-f3d-conf">Conf: --%</div>
+                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
                     </div>
-                    <div class="f-card" id="f-card-5d">
-                        <div class="f-label">5D Forecast</div>
+                    <div class="f-card" id="f-card-5d" data-horizon="5d" title="Click to inspect 5-Day AI Explainability Decomposition">
+                        <div class="f-label"><span>🎯</span> 5D Forecast</div>
                         <div class="f-price" id="detail-f5d-price">--</div>
                         <div class="f-ret" id="detail-f5d-ret">--</div>
-                        <div class="f-conf" id="detail-f5d-conf">--</div>
+                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f5d-bar" style="width: 0%;"></div></div>
+                        <div class="f-conf" id="detail-f5d-conf">Conf: --%</div>
+                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
                     </div>
-                    <div class="f-card" id="f-card-7d">
-                        <div class="f-label">7D Forecast</div>
+                    <div class="f-card" id="f-card-7d" data-horizon="7d" title="Click to inspect 7-Day AI Explainability Decomposition">
+                        <div class="f-label"><span>🧭</span> 7D Forecast</div>
                         <div class="f-price" id="detail-f7d-price">--</div>
                         <div class="f-ret" id="detail-f7d-ret">--</div>
-                        <div class="f-conf" id="detail-f7d-conf">--</div>
+                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f7d-bar" style="width: 0%;"></div></div>
+                        <div class="f-conf" id="detail-f7d-conf">Conf: --%</div>
+                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
                     </div>
                 </div>
 
-                <div class="chart-container">
-                    <canvas id="forecastChart"></canvas>
+                <!-- Interactive Chart Timeline Box -->
+                <div class="chart-container-box">
+                    <div class="chart-header-row">
+                        <h2>Interactive Multi-Horizon Timeline</h2>
+                        <div class="chart-caption">
+                            <span>💡</span>
+                            <span>Click any historical node or forecast dot (+1D, +3D, +5D, +7D) for AI Explainability</span>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Column: Explanations -->
+            <!-- Right Column: Explainable AI & Intelligence -->
             <div class="col-right">
-                <!-- Forensic Side Panel (Default Hidden) -->
-                <div id="forensic-panel" class="panel hidden">
+                <!-- Deep-Dive Explainability & Candle Forensics Side Panel -->
+                <div id="forensic-panel" class="hidden">
                     <div class="panel-header">
-                        <h2>Candle Forensic Attribution</h2>
-                        <button id="close-forensic-btn" class="close-btn">&times;</button>
+                        <div>
+                            <span id="forensic-mode-pill" class="mc-pill">AI EXPLAINABILITY</span>
+                            <h2 id="forensic-title" style="margin-top: 4px;">Prediction Decomposition</h2>
+                        </div>
+                        <button id="close-forensic-btn" class="close-btn" title="Close Panel">&times;</button>
                     </div>
                     <div class="forensic-body">
-                        <div class="forensic-section">
-                            <h3>Target Reference Date: <span id="forensic-date">--</span></h3>
-                            <div class="forensic-ohlcv-grid">
-                                <div>Open: <span id="forensic-open">--</span></div>
-                                <div>Close: <span id="forensic-close">--</span></div>
-                                <div>High: <span id="forensic-high">--</span></div>
-                                <div>Low: <span id="forensic-low">--</span></div>
-                                <div>Volume: <span id="forensic-volume">--</span></div>
+                        <div class="forensic-section" id="forensic-target-meta">
+                            <h3 id="forensic-target-heading">Target Horizon: <span id="forensic-date" style="color: var(--accent);">--</span></h3>
+                            <div class="forensic-ohlcv-grid" id="forensic-metrics-grid">
+                                <div>Predicted: <span id="forensic-open">--</span></div>
+                                <div>Expected Move: <span id="forensic-close">--</span></div>
+                                <div>Confidence: <span id="forensic-high">--</span></div>
+                                <div>Model Type: <span id="forensic-low">Ensemble</span></div>
+                                <div>Volume/Beta: <span id="forensic-volume">--</span></div>
                             </div>
                         </div>
                         <div class="forensic-section">
-                            <h3>Market & Sector Context</h3>
-                            <div id="forensic-market-context">--</div>
+                            <h3>Market &amp; Sector Context</h3>
+                            <div id="forensic-market-context" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">--</div>
                         </div>
                         <div class="forensic-section">
-                            <h3>Technical Attributions</h3>
-                            <ul id="forensic-tech-list">
+                            <h3>Key Signal Attributions (SHAP)</h3>
+                            <ul id="forensic-tech-list" style="padding-left: 0; list-style: none;">
                                 <!-- JS populated -->
                             </ul>
                         </div>
                         <div class="forensic-section">
-                            <h3>Causal News Headlines</h3>
+                            <h3>Causal News Drivers</h3>
                             <div id="forensic-news-list">
                                 <!-- JS populated -->
                             </div>
                         </div>
                         <div class="forensic-section">
-                            <h3>Historical Similar Situations</h3>
-                            <div id="forensic-similarity-stats">--</div>
+                            <h3>Historical Similar Scenarios</h3>
+                            <div id="forensic-similarity-stats" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">--</div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Primary SHAP Factor Importance Panel -->
                 <div class="panel">
-                    <h2>Why? <span class="subtitle">Model Explanation</span></h2>
-                    <div id="shap-container" class="shap-list">
-                        <div class="placeholder">Select a bank to view explanation</div>
+                    <div class="panel-title-row">
+                        <h2>Why? <span class="subtitle">Feature Attribution</span></h2>
+                        <div class="bank-filter-tabs" id="explain-horizon-tabs">
+                            <button type="button" class="filter-pill active" data-h="1d">1D</button>
+                            <button type="button" class="filter-pill" data-h="3d">3D</button>
+                            <button type="button" class="filter-pill" data-h="5d">5D</button>
+                            <button type="button" class="filter-pill" data-h="7d">7D</button>
+                        </div>
                     </div>
-                    <div id="narrative-container" class="narrative"></div>
+                    <div id="shap-container" class="shap-list">
+                        <div class="placeholder">Select a bank to view feature drivers</div>
+                    </div>
+                    <div class="narrative-box">
+                        <div class="narrative-title">✨ Quantitative Synthesis</div>
+                        <div id="narrative-container">Select a bank to view explainable synthesis.</div>
+                    </div>
                 </div>
 
+                <!-- News Intelligence Panel -->
                 <div class="panel">
-                    <h2>News Intelligence</h2>
+                    <div class="panel-title-row">
+                        <h2>News Intelligence</h2>
+                        <span id="news-sentiment-summary" class="news-sent-gauge">Analyzing news...</span>
+                    </div>
                     <div id="news-list" class="news-list">
                         <!-- JS populated -->
                     </div>
                 </div>
 
+                <!-- Historical Scenario Similarity Panel -->
                 <div class="panel">
-                    <h2>Historical Similarity</h2>
+                    <div class="panel-title-row">
+                        <h2>Historical Similarity</h2>
+                        <span class="mc-pill">COSINE REGIME</span>
+                    </div>
                     <div id="events-container" class="events-container">
                         <!-- JS populated -->
                     </div>
@@ -219,85 +304,93 @@
         </div>
     </main>
 
+    <!-- Footer -->
     <footer>
-        <div>Model Performance: <span id="perf-metrics">MAE: -- | Dir Acc: --</span></div>
-        <div>BankSight AI &copy; 2026. For research purposes only. Not financial advice.</div>
+        <div>Model Status: <span id="perf-metrics" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">Evaluating walk-forward metrics...</span></div>
+        <div>
+            <a href="/manual" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 700; margin-right: 18px;">📖 User Manual &amp; Documentation Portal</a>
+            BankSight AI &copy; 2026. Explainable Market Intelligence for Indian Banking Equities.
+        </div>
     </footer>
 
     <!-- Email Report Modal -->
     <div id="email-modal" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h2>Email Research Report</h2>
-                <button id="close-email-modal-btn" class="close-btn">&times;</button>
+                <h2>Email Research Briefing</h2>
+                <button id="close-email-modal-btn" class="close-btn" title="Close">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:15px;line-height:1.4;">Enter your email to receive this stock intelligence report as an attachment in your inbox.</p>
+                <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">
+                    Enter your email to receive this stock's publication-grade vector PDF research briefing directly in your inbox.
+                </p>
                 <form id="email-report-form">
-                    <div style="margin-bottom:15px;">
-                        <label for="report-email" style="display:block;font-size:0.75rem;font-weight:600;margin-bottom:4px;color:var(--text-color);">Email Address</label>
-                        <input type="email" id="report-email" placeholder="name@example.com" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;box-sizing:border-box;font-size:0.85rem;">
+                    <div style="margin-bottom:16px;">
+                        <label for="report-email" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:6px;color:var(--text-main);">Email Address</label>
+                        <input type="email" id="report-email" class="bank-search-input" placeholder="trader@institution.com" required style="padding: 10px 14px;">
                     </div>
                     
                     <!-- Captcha Box -->
-                    <div class="captcha-box" style="border:1px solid #d3d3d3;border-radius:3px;background:#f9f9f9;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                    <div class="captcha-box" style="border:1px solid var(--border);border-radius:10px;background:var(--bg-card-hover);padding:14px;display:flex;flex-direction:column;gap:10px;">
                         <div class="captcha-row" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-                            <div style="display:flex;align-items:center;gap:10px;">
-                                <input type="checkbox" id="captcha-checkbox" style="width:24px;height:24px;cursor:pointer;">
-                                <label for="captcha-checkbox" style="font-size:0.85rem;font-weight:600;color:#333;cursor:pointer;">I am not a robot</label>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <input type="checkbox" id="captcha-checkbox" style="width:22px;height:22px;cursor:pointer;accent-color:var(--accent);">
+                                <label for="captcha-checkbox" style="font-size:0.85rem;font-weight:700;color:var(--text-main);cursor:pointer;">I am not a robot</label>
                             </div>
                             <div class="captcha-logo" style="text-align:center;">
                                 <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" style="width:24px;height:24px;">
-                                <div style="font-size:8px;color:#9b9b9b;margin-top:2px;">reCAPTCHA</div>
+                                <div style="font-size:8px;color:var(--text-dim);margin-top:2px;">reCAPTCHA</div>
                             </div>
                         </div>
-                        <div id="captcha-challenge-box" class="hidden" style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:8px;">
-                            <p style="font-size:0.8rem;margin:0 0 6px 0;font-weight:600;color:var(--text-color);">Verify you are human: What is <span id="captcha-question" style="color:#2563eb;font-weight:bold;">5 + 4</span>?</p>
-                            <input type="number" id="captcha-answer" placeholder="Your answer" style="width:100%;padding:6px;border-radius:4px;border:1px solid #cbd5e1;box-sizing:border-box;font-size:0.85rem;">
+                        <div id="captcha-challenge-box" class="hidden" style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px;">
+                            <p style="font-size:0.82rem;margin:0 0 6px 0;font-weight:700;color:var(--text-main);">Human Verification: What is <span id="captcha-question" style="color:var(--accent);font-weight:bold;">5 + 4</span>?</p>
+                            <input type="number" id="captcha-answer" class="bank-search-input" placeholder="Enter answer" style="padding: 8px 12px;">
                         </div>
                     </div>
                     
-                    <button type="submit" id="submit-email-report-btn" class="btn btn-primary" style="width:100%;margin-top:15px;padding:10px;" disabled>Send Report</button>
-                    <div id="email-report-status" style="font-size:0.75rem;margin-top:8px;text-align:center;" class="hidden"></div>
+                    <button type="submit" id="submit-email-report-btn" class="btn btn-primary" style="width:100%;margin-top:18px;padding:12px;justify-content:center;" disabled>
+                        Send Research Report
+                    </button>
+                    <div id="email-report-status" style="font-size:0.78rem;margin-top:10px;text-align:center;" class="hidden"></div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Backend & SMTP Settings Modal -->
+    <!-- Backend & Cloud Settings Modal -->
     <div id="settings-modal" class="modal-overlay hidden">
         <div class="modal-card" style="max-width: 520px;">
             <div class="modal-header">
-                <h2>Backend & Cloud Settings</h2>
+                <h2>Cloud Backend &amp; SMTP Settings</h2>
                 <button class="close-btn" id="close-settings-modal-btn">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 20px;">
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                    Connect this frontend to your Python backend on Render.
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+                    Configure your live Python backend URL (e.g. deployed on Render) and test automated Gmail SMTP email dispatching.
                 </p>
                 <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px;">Render Backend API URL</label>
-                    <input type="text" id="api-url-input" placeholder="https://banksight-ai.onrender.com/api" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
-                    <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display: block;">
-                        Default is <code>/api</code> (works with local server or Vercel rewrite proxy).
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main);">Render Backend API URL</label>
+                    <input type="text" id="api-url-input" class="bank-search-input" placeholder="https://banksight-ai-backend.onrender.com/api" style="padding: 10px 14px;">
+                    <small style="color: var(--text-dim); font-size: 0.75rem; margin-top: 6px; display: block;">
+                        Leave blank to use default <code>/api</code> (recommended for local server or Vercel proxy rewrite).
                     </small>
                 </div>
                 <div style="display: flex; gap: 8px; margin-bottom: 18px;">
-                    <button type="button" id="save-api-url-btn" class="btn btn-primary" style="flex: 1; padding: 8px;">Save & Connect</button>
-                    <button type="button" id="reset-api-url-btn" class="btn btn-secondary" style="padding: 8px;">Reset Default (/api)</button>
+                    <button type="button" id="save-api-url-btn" class="btn btn-primary" style="flex: 1; justify-content: center;">Save &amp; Connect</button>
+                    <button type="button" id="reset-api-url-btn" class="btn btn-secondary">Reset Default</button>
                 </div>
                 
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 18px 0;">
                 
-                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 600;">SMTP Email Verification</h3>
-                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
-                    Verify that your Render environment variables (Gmail SMTP credentials) are active.
+                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main);">SMTP Email Service Verification</h3>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                    Verify that your Render environment variables (Gmail SMTP credentials) are properly configured.
                 </p>
-                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                    <input type="email" id="test-smtp-email" placeholder="Recipient email for test message" style="flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem;">
-                    <button type="button" id="test-smtp-btn" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.82rem;">Send Test Email</button>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <input type="email" id="test-smtp-email" class="bank-search-input" placeholder="Recipient email for test briefing" style="flex: 1; padding: 8px 12px;">
+                    <button type="button" id="test-smtp-btn" class="btn btn-secondary">Test SMTP</button>
                 </div>
-                <div id="settings-status-box" style="padding: 10px; border-radius: 6px; font-size: 0.8rem; background: #f8fafc; border: 1px solid #e2e8f0; display: none;"></div>
+                <div id="settings-status-box" style="padding: 12px; border-radius: 8px; font-size: 0.82rem; background: var(--bg-card-hover); border: 1px solid var(--border); display: none;"></div>
             </div>
         </div>
     </div>

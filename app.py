@@ -35,6 +35,10 @@ evaluator = Evaluator(db)
 def index():
     return send_from_directory(app.static_folder, "index.html")
 
+@app.route("/manual")
+def serve_manual():
+    return send_from_directory(app.static_folder, "manual.html")
+
 @app.route("/<path:path>")
 def serve_static(path):
     if os.path.exists(os.path.join(app.static_folder, path)):
@@ -178,17 +182,24 @@ def get_explanation(symbol):
     if symbol not in config.STOCKS:
         return jsonify({"error": "Invalid symbol"}), 404
     
+    horizon = request.args.get("horizon", "5d").lower()
+    if horizon not in ["1d", "3d", "5d", "7d"]:
+        horizon = "5d"
+    
     # SHAP Explanation
-    shap_expl = explainer.generate_shap_explanation(symbol)
+    shap_expl = explainer.generate_shap_explanation(symbol, horizon=horizon)
     
     # Text Narrative
     pred = db.get_latest_prediction(symbol)
     narrative = ""
     if pred:
         date_str = pred.get("timestamp", "").split("T")[0]
-        narrative = explainer.generate_narrative(symbol, date_str)
+        narrative = explainer.generate_narrative(symbol, date=date_str, horizon=horizon)
+    else:
+        narrative = explainer.generate_narrative(symbol, horizon=horizon)
         
     return jsonify({
+        "horizon": horizon.upper(),
         "shap": shap_expl,
         "narrative": narrative
     })
