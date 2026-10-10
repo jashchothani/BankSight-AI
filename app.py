@@ -203,9 +203,23 @@ def get_events(symbol):
         import json
         try:
             expl = json.loads(pred["explanation_json"])
-            return jsonify(expl.get("events", {}))
+            if expl and "events" in expl and expl["events"]:
+                return jsonify(expl.get("events", {}))
         except:
             pass
+
+    # Dynamic fallback: compute top similar events from historical features
+    try:
+        from src.events import EventSimilarityEngine
+        sim_engine = EventSimilarityEngine(db)
+        md = db.get_market_data(symbol)
+        if not md.empty:
+            latest_date = str(md.iloc[-1]["date"]).split()[0]
+            sim_data = sim_engine.find_similar_events(symbol, latest_date)
+            if "error" not in sim_data:
+                return jsonify(sim_data)
+    except Exception as e:
+        app.logger.warning(f"Event similarity fallback failed for {symbol}: {e}")
             
     return jsonify({"error": "No event similarity data found."})
 
