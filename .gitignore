@@ -1,7 +1,5 @@
 .env
-db/
 data/
-models/
 __pycache__/
 .pytest_cache/
 *.pyc
@@ -10,3 +8,10 @@ __pycache__/
 .DS_Store
 *.log
 *.pdf
+*.zip
+*.csv
+BankSight_AI_LaTeX_Source_FINAL/
+analysis_package/
+*.sqlite-journal
+*.db-shm
+*.db-wal

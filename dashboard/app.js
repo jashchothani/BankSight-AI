@@ -1,6 +1,20 @@
 // BankSight AI Dashboard Logic
 
-const API_BASE = '/api';
+function resolveApiBase() {
+    if (typeof window !== 'undefined') {
+        if (window.BANKSIGHT_API_BASE) {
+            return window.BANKSIGHT_API_BASE.replace(/\/+$/, '');
+        }
+        const saved = localStorage.getItem('BANKSIGHT_API_BASE');
+        if (saved && saved.trim()) {
+            return saved.trim().replace(/\/+$/, '');
+        }
+    }
+    return '/api';
+}
+
+let API_BASE = resolveApiBase();
+
 let currentBank = null;
 let currentBankName = "";
 let chartInstance = null;
@@ -113,6 +127,92 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Backend & Cloud settings modal listeners
+    const backendStatusItem = document.getElementById('backend-status-item');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
+    const apiUrlInput = document.getElementById('api-url-input');
+    const saveApiUrlBtn = document.getElementById('save-api-url-btn');
+    const resetApiUrlBtn = document.getElementById('reset-api-url-btn');
+    const testSmtpBtn = document.getElementById('test-smtp-btn');
+
+    if (backendStatusItem && settingsModal) {
+        backendStatusItem.addEventListener('click', () => {
+            if (apiUrlInput) apiUrlInput.value = API_BASE === '/api' ? '' : API_BASE;
+            const statusBox = document.getElementById('settings-status-box');
+            if (statusBox) statusBox.style.display = 'none';
+            settingsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeSettingsModalBtn && settingsModal) {
+        closeSettingsModalBtn.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+    }
+
+    if (saveApiUrlBtn) {
+        saveApiUrlBtn.addEventListener('click', () => {
+            const val = apiUrlInput.value.trim();
+            if (val) {
+                const formatted = val.replace(/\/+$/, '');
+                localStorage.setItem('BANKSIGHT_API_BASE', formatted);
+                API_BASE = formatted;
+            } else {
+                localStorage.removeItem('BANKSIGHT_API_BASE');
+                API_BASE = '/api';
+            }
+            settingsModal.classList.add('hidden');
+            fetchHealth();
+            fetchMarket();
+            fetchBanks();
+        });
+    }
+
+    if (resetApiUrlBtn) {
+        resetApiUrlBtn.addEventListener('click', () => {
+            localStorage.removeItem('BANKSIGHT_API_BASE');
+            API_BASE = '/api';
+            if (apiUrlInput) apiUrlInput.value = '';
+            settingsModal.classList.add('hidden');
+            fetchHealth();
+            fetchMarket();
+            fetchBanks();
+        });
+    }
+
+    if (testSmtpBtn) {
+        testSmtpBtn.addEventListener('click', async () => {
+            const statusBox = document.getElementById('settings-status-box');
+            const emailInput = document.getElementById('test-smtp-email');
+            const targetEmail = emailInput ? emailInput.value.trim() : '';
+            if (statusBox) {
+                statusBox.style.display = 'block';
+                statusBox.innerHTML = '<span style="color: #2563eb;">Testing SMTP configuration...</span>';
+            }
+            try {
+                let res;
+                if (targetEmail) {
+                    res = await fetch(`${API_BASE}/smtp/test`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: targetEmail })
+                    });
+                } else {
+                    res = await fetch(`${API_BASE}/smtp/test`);
+                }
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    statusBox.innerHTML = `<span style="color: #10b981; font-weight:600;">✓ ${data.message}</span>`;
+                } else {
+                    statusBox.innerHTML = `<span style="color: #ef4444; font-weight:600;">✗ ${data.message || data.error || 'Failed'}</span>`;
+                }
+            } catch (err) {
+                if (statusBox) statusBox.innerHTML = `<span style="color: #ef4444;">Error: ${err.message}</span>`;
+            }
+        });
+    }
+
     // Auto-refresh from database every 60 seconds (for updates like news/ML retraining)
     setInterval(() => {
         fetchHealth(); // refresh market status too
@@ -127,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dynamic tick-by-tick real-time simulator (every 2.5 seconds)
     startRealTimeTickSim();
 });
+
 
 // Utilities
 const formatPrice = (val) => val != null ? '₹' + val.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '--';
@@ -196,14 +297,21 @@ function startRealTimeTickSim() {
 // --- API Calls ---
 
 async function fetchHealth() {
+    const backendLabelEl = document.getElementById('backend-label');
+    const statusBackendEl = document.getElementById('status-backend');
+
     try {
         const res = await fetch(`${API_BASE}/health`);
         const data = await res.json();
         
+        if (backendLabelEl) backendLabelEl.innerText = API_BASE === '/api' ? 'Online' : 'Render';
+        if (statusBackendEl) statusBackendEl.className = 'dot green';
+
         const errorBanner = document.getElementById('error-banner');
         if (errorBanner) {
             if (data.data_status && data.data_status.market === 'error') {
                 errorBanner.classList.remove('hidden');
+                errorBanner.innerText = 'LIVE MARKET DATA UNAVAILABLE — Market-data provider is currently offline or rate-limited.';
             } else {
                 errorBanner.classList.add('hidden');
             }
@@ -233,18 +341,30 @@ async function fetchHealth() {
             else { el.className = 'dot'; }
         };
         
-        setStatus('status-market', ds.market);
-        setStatus('status-news', ds.news);
+        setStatus('status-market', ds ? ds.market : 'connected');
+        setStatus('status-news', ds ? ds.news : 'connected');
         setStatus('status-model', 'connected'); 
         
         const timeStr = new Date().toLocaleTimeString();
-        document.getElementById('last-update-time').innerText = timeStr;
+        const lastUpdateEl = document.getElementById('last-update-time');
+        if (lastUpdateEl) lastUpdateEl.innerText = timeStr;
     } catch (e) {
         console.error("Health check failed", e);
+        if (backendLabelEl) backendLabelEl.innerText = 'Offline';
+        if (statusBackendEl) statusBackendEl.className = 'dot red';
+
         const errorBanner = document.getElementById('error-banner');
-        if (errorBanner) errorBanner.classList.remove('hidden');
+        if (errorBanner) {
+            errorBanner.classList.remove('hidden');
+            if (window.location.hostname.includes('vercel.app')) {
+                errorBanner.innerHTML = 'BACKEND CONNECTING / UNREACHABLE — Click "Backend ⚙️" in the top bar to set your Render API URL, or wait if Render is cold-starting.';
+            } else {
+                errorBanner.innerText = 'BACKEND SERVER OFFLINE — Please ensure python backend is running.';
+            }
+        }
     }
 }
+
 
 async function fetchMarket() {
     try {

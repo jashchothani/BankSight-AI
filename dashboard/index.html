@@ -27,6 +27,9 @@
             <div class="status-item"><span class="dot" id="status-market"></span>Market Data</div>
             <div class="status-item"><span class="dot" id="status-news"></span>News</div>
             <div class="status-item"><span class="dot" id="status-model"></span>Model</div>
+            <div class="status-item" id="backend-status-item" style="cursor: pointer; background: rgba(37,99,235,0.06); padding: 3px 8px; border-radius: 6px; border: 1px solid #cbd5e1;" title="Click to configure Render backend URL or test SMTP">
+                <span class="dot" id="status-backend"></span>Backend: <span id="backend-label" style="font-weight:600;">Connecting</span> ⚙️
+            </div>
             <div class="status-time">Last Update: <span id="last-update-time">--:--:--</span></div>
         </div>
     </header>
@@ -240,6 +243,44 @@
                     <button type="submit" id="submit-email-report-btn" class="btn btn-primary" style="width:100%;margin-top:15px;padding:10px;" disabled>Send Report</button>
                     <div id="email-report-status" style="font-size:0.75rem;margin-top:8px;text-align:center;" class="hidden"></div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backend & SMTP Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card" style="max-width: 520px;">
+            <div class="modal-header">
+                <h2>Backend & Cloud Settings</h2>
+                <button class="close-btn" id="close-settings-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Connect this frontend to your Python backend on Render.
+                </p>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px;">Render Backend API URL</label>
+                    <input type="text" id="api-url-input" placeholder="https://banksight-ai.onrender.com/api" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                    <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display: block;">
+                        Default is <code>/api</code> (works with local server or Vercel rewrite proxy).
+                    </small>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 18px;">
+                    <button type="button" id="save-api-url-btn" class="btn btn-primary" style="flex: 1; padding: 8px;">Save & Connect</button>
+                    <button type="button" id="reset-api-url-btn" class="btn btn-secondary" style="padding: 8px;">Reset Default (/api)</button>
+                </div>
+                
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+                
+                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 600;">SMTP Email Verification</h3>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+                    Verify that your Render environment variables (Gmail SMTP credentials) are active.
+                </p>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="email" id="test-smtp-email" placeholder="Recipient email for test message" style="flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem;">
+                    <button type="button" id="test-smtp-btn" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.82rem;">Send Test Email</button>
+                </div>
+                <div id="settings-status-box" style="padding: 10px; border-radius: 6px; font-size: 0.8rem; background: #f8fafc; border: 1px solid #e2e8f0; display: none;"></div>
             </div>
         </div>
     </div>

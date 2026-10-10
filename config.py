@@ -64,7 +64,8 @@ SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-SMTP_FROM = os.getenv("SMTP_FROM", "alerts@banksight.ai")
+SMTP_FROM = os.getenv("SMTP_FROM", os.getenv("SMTP_USER", "alerts@banksight.ai"))
+
 
 # ---------------------------------------------------------------------------
 # Stocks — Configurable list of Indian banking stocks
@@ -189,6 +190,7 @@ TRAIN_MIN_DAYS = 504  # ~2 years of trading days
 VALIDATION_DAYS = 126  # ~6 months
 TEST_DAYS = 63  # ~3 months
 WALK_FORWARD_STEP = 252  # step forward by ~1 year
+EMBARGO_DAYS = 7
 
 # Model hyperparameters
 XGBOOST_PARAMS = {
@@ -235,8 +237,8 @@ RETRAIN_SCHEDULE = "daily"  # "daily", "weekly"
 # Server
 # ---------------------------------------------------------------------------
 FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0")
-FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
-FLASK_DEBUG = os.getenv("FLASK_DEBUG", "true").lower() == "true"
+FLASK_PORT = int(os.getenv("PORT", os.getenv("FLASK_PORT", "5000")))
+FLASK_DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Kafka (optional)

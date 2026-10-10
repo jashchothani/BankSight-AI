@@ -78,8 +78,11 @@ def health():
         "timestamp": datetime.now().isoformat(),
         "mode": "DEMO" if config.is_demo_mode() else "LIVE",
         "market_status": check_market_status(),
-        "data_status": pipeline.status
+        "data_status": pipeline.status,
+        "smtp_configured": bool(config.SMTP_USER and config.SMTP_PASSWORD),
+        "smtp_server": config.SMTP_SERVER if config.SMTP_USER else None
     })
+
 
 @app.route("/api/market")
 def get_market():
@@ -570,8 +573,63 @@ def get_performance():
     metrics = evaluator.get_system_metrics()
     return jsonify(metrics)
 
+@app.route("/api/smtp/test", methods=["GET", "POST"])
+def test_smtp_endpoint():
+    """
+    Test endpoint for validating SMTP configuration on Render or local.
+    GET: Checks connection & authentication.
+    POST: Sends a test email to the provided address: {"email": "..."}
+    """
+    from src.mail import test_smtp_connection
+    
+    if request.method == "POST":
+        data = request.get_json() or {}
+        to_email = data.get("email", "").strip()
+        if not to_email or "@" not in to_email:
+            return jsonify({"error": "Please provide a valid email address."}), 400
+            
+        test_html = """
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
+            <h2 style="color: #2563eb;">BankSight AI — SMTP Verification Successful</h2>
+            <p>Your SMTP email configuration on Render is working properly!</p>
+            <p>You will now be able to receive daily market forecasts and PDF intelligence reports directly in your inbox.</p>
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+            <small style="color: #64748b;">Automated message sent by BankSight AI</small>
+        </div>
+        """
+        success = send_email(
+            to_email=to_email,
+            subject="BankSight AI — SMTP Test Successful",
+            html_body=test_html
+        )
+        if success:
+            return jsonify({"success": True, "message": f"Test email sent successfully to {to_email}."})
+        else:
+            return jsonify({"error": "Failed sending test email. Check Render environment variables and logs."}), 500
+
+    # GET request: check connection & auth
+    ok, msg = test_smtp_connection()
+    return jsonify({
+        "configured": bool(config.SMTP_USER and config.SMTP_PASSWORD),
+        "success": ok,
+        "message": msg,
+        "server": config.SMTP_SERVER,
+        "port": config.SMTP_PORT,
+        "user": config.SMTP_USER if config.SMTP_USER else "Not configured"
+    }), (200 if ok else (400 if not config.SMTP_USER else 502))
+
+
+import threading
+_schedulers_started = False
+_sched_lock = threading.Lock()
+
 def start_background_schedulers():
-    import threading
+    global _schedulers_started
+    with _sched_lock:
+        if _schedulers_started:
+            return
+        _schedulers_started = True
+
     import time
     
     # Start background mail scheduler
@@ -596,6 +654,10 @@ def start_background_schedulers():
     t = threading.Thread(target=update_news_loop, daemon=True)
     t.start()
 
+# When running in production (Gunicorn / Render), auto-start background schedulers
+if not config.FLASK_DEBUG or os.environ.get("RENDER") or os.environ.get("GUNICORN_CMD_ARGS"):
+    start_background_schedulers()
+
 if __name__ == "__main__":
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not config.FLASK_DEBUG:
         start_background_schedulers()
@@ -605,3 +667,4 @@ if __name__ == "__main__":
         port=config.FLASK_PORT,
         debug=config.FLASK_DEBUG
     )
+

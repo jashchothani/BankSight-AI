@@ -20,6 +20,33 @@ from src.data import Database
 
 log = logging.getLogger("MAIL")
 
+def test_smtp_connection() -> tuple[bool, str]:
+    """Test connecting to and authenticating with the configured SMTP server."""
+    if not config.SMTP_USER or not config.SMTP_PASSWORD:
+        return False, "SMTP_USER or SMTP_PASSWORD environment variables are not set."
+    
+    timeout = 20
+    try:
+        if config.SMTP_PORT == 465:
+            server = smtplib.SMTP_SSL(config.SMTP_SERVER, config.SMTP_PORT, timeout=timeout)
+        else:
+            server = smtplib.SMTP(config.SMTP_SERVER, config.SMTP_PORT, timeout=timeout)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+        server.login(config.SMTP_USER, config.SMTP_PASSWORD)
+        server.quit()
+        return True, f"Successfully authenticated with {config.SMTP_SERVER}:{config.SMTP_PORT} as {config.SMTP_USER}."
+    except smtplib.SMTPAuthenticationError as e:
+        return False, (
+            f"SMTP Authentication Failed: {e}. "
+            "If using Gmail, ensure 2-Factor Authentication is active and you are using a "
+            "16-character Google App Password (not your primary password)."
+        )
+    except Exception as e:
+        return False, f"SMTP Connection Failed ({type(e).__name__}): {e}"
+
+
 def send_email(to_email: str, subject: str, html_body: str, attachment_bytes: bytes = None, attachment_filename: str = None) -> bool:
     """
     Send an HTML email, optionally attaching a file (like a PDF report).
@@ -41,7 +68,8 @@ def send_email(to_email: str, subject: str, html_body: str, attachment_bytes: by
     try:
         # Create Message container
         msg = MIMEMultipart()
-        msg['From'] = config.SMTP_FROM
+        sender_email = config.SMTP_FROM or config.SMTP_USER
+        msg['From'] = f"BankSight AI <{sender_email}>"
         msg['To'] = to_email
         msg['Subject'] = subject
         
@@ -56,18 +84,31 @@ def send_email(to_email: str, subject: str, html_body: str, attachment_bytes: by
             part.add_header('Content-Disposition', f'attachment; filename="{attachment_filename}"')
             msg.attach(part)
             
-        # Connect to SMTP Server
-        server = smtplib.SMTP(config.SMTP_SERVER, config.SMTP_PORT)
-        server.starttls()
+        # Connect to SMTP Server with timeout
+        timeout = 20
+        if config.SMTP_PORT == 465:
+            server = smtplib.SMTP_SSL(config.SMTP_SERVER, config.SMTP_PORT, timeout=timeout)
+        else:
+            server = smtplib.SMTP(config.SMTP_SERVER, config.SMTP_PORT, timeout=timeout)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            
         server.login(config.SMTP_USER, config.SMTP_PASSWORD)
         
         # Send Email
-        server.sendmail(config.SMTP_FROM, to_email, msg.as_string())
+        server.sendmail(sender_email, to_email, msg.as_string())
         server.quit()
         log.info(f"Successfully sent email to {to_email}")
         return True
+    except smtplib.SMTPAuthenticationError as e:
+        log.error(
+            f"Failed to send email to {to_email} due to authentication error: {e}. "
+            "Please check that SMTP_USER and SMTP_PASSWORD (use Gmail App Password) are correct."
+        )
+        return False
     except Exception as e:
-        log.error(f"Failed to send email to {to_email}: {e}")
+        log.error(f"Failed to send email to {to_email} ({type(e).__name__}): {e}")
         return False
 
 

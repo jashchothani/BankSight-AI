@@ -95,3 +95,36 @@ def test_data_pipeline_missing_handler(test_db):
 def test_no_demo_mode_policy():
     """Verify system strictly rejects demo mode fallbacks as per live-only policy."""
     assert config.is_demo_mode() == False
+
+
+def test_smtp_behavior():
+    """Verify SMTP handles unconfigured environments cleanly without exceptions."""
+    from src.mail import test_smtp_connection, send_email
+    # Unconfigured check
+    ok, msg = test_smtp_connection()
+    assert isinstance(ok, bool)
+    assert isinstance(msg, str)
+
+    # Mock send in unconfigured env
+    res = send_email("test@example.com", "Test Subject", "<p>Test Body</p>")
+    assert res == True
+
+
+def test_api_health_and_smtp_routes():
+    """Verify /api/health and /api/smtp/test respond with valid JSON."""
+    from app import app
+    client = app.test_client()
+    
+    # Health check
+    res = client.get("/api/health")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "status" in data
+    assert "smtp_configured" in data
+    
+    # SMTP test endpoint
+    res_smtp = client.get("/api/smtp/test")
+    assert res_smtp.status_code in [200, 400, 502]
+    data_smtp = res_smtp.get_json()
+    assert "configured" in data_smtp
+
