@@ -170,14 +170,92 @@ h2 {
 }
 
 /* Left Column */
+.bank-controls {
+    margin-bottom: 12px;
+}
+.bank-search-bar {
+    margin-bottom: 8px;
+    position: relative;
+}
+.bank-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    background: var(--bg-card);
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+.bank-search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.bank-filter-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.bank-filter-tabs::-webkit-scrollbar {
+    display: none;
+}
+.filter-pill {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+.filter-pill:hover {
+    background: #e2e8f0;
+    color: var(--text-main);
+}
+.filter-pill.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
 .bank-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    max-height: 580px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
+.bank-list::-webkit-scrollbar {
+    width: 5px;
+}
+.bank-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.bank-badge {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-left: 6px;
+}
+.badge-nifty_bank { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+.badge-psu { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+.badge-private { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.badge-sfb { background: rgba(139, 92, 246, 0.14); color: #7c3aed; }
 .bank-item {
     background: var(--bg-card);
     border: 1px solid var(--border);
+
     padding: 18px;
     border-radius: 16px;
     cursor: pointer;

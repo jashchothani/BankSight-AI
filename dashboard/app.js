@@ -37,6 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchMarket();
     fetchBanks();
     
+    // Bank search and filter tabs
+    const bankSearchInput = document.getElementById('bank-search-input');
+    if (bankSearchInput) {
+        bankSearchInput.addEventListener('input', (e) => {
+            bankSearchQuery = e.target.value.trim();
+            renderBankList();
+        });
+    }
+
+    const filterPills = document.querySelectorAll('.filter-pill');
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentBankFilter = pill.getAttribute('data-filter') || 'all';
+            renderBankList();
+        });
+    });
+
+    
     // Attach action listeners
     const dlBtn = document.getElementById('download-report-btn');
     if (dlBtn) dlBtn.addEventListener('click', downloadReport);
@@ -394,50 +414,120 @@ async function fetchMarket() {
     }
 }
 
+let rawBanksList = [];
+let currentBankFilter = 'all';
+let bankSearchQuery = '';
+
+function renderBankList() {
+    const container = document.getElementById('bank-list');
+    if (!container) return;
+    
+    // Filter
+    let filtered = rawBanksList.filter(b => {
+        // Category filter
+        if (currentBankFilter === 'nifty_bank') {
+            if (b.category !== 'nifty_bank') return false;
+        } else if (currentBankFilter === 'psu') {
+            if (b.type !== 'psu') return false;
+        } else if (currentBankFilter === 'private') {
+            if (b.type !== 'private' || b.category === 'sfb') return false;
+        } else if (currentBankFilter === 'sfb') {
+            if (b.category !== 'sfb' && b.type !== 'sfb') return false;
+        }
+
+        // Search query
+        if (bankSearchQuery) {
+            const q = bankSearchQuery.toLowerCase();
+            const nameMatch = b.name && b.name.toLowerCase().includes(q);
+            const symMatch = b.symbol && b.symbol.toLowerCase().includes(q);
+            if (!nameMatch && !symMatch) return false;
+        }
+        return true;
+    });
+
+    const countPill = document.getElementById('bank-count-pill');
+    if (countPill) {
+        if (currentBankFilter === 'all' && !bankSearchQuery) {
+            countPill.innerText = `${rawBanksList.length} Listed Banks`;
+        } else {
+            countPill.innerText = `${filtered.length} of ${rawBanksList.length} Banks`;
+        }
+    }
+
+    container.innerHTML = '';
+    if (filtered.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No banks match your search/filter.</div>';
+        return;
+    }
+
+    filtered.forEach(b => {
+        // Save to live prices
+        if (!livePrices[b.symbol]) {
+            livePrices[b.symbol] = b.current_price;
+        }
+
+        let badgeClass = 'badge-private';
+        let badgeLabel = 'PVT';
+        if (b.category === 'nifty_bank') {
+            badgeClass = 'badge-nifty_bank';
+            badgeLabel = 'NIFTY';
+        } else if (b.type === 'psu') {
+            badgeClass = 'badge-psu';
+            badgeLabel = 'PSU';
+        } else if (b.type === 'sfb' || b.category === 'sfb') {
+            badgeClass = 'badge-sfb';
+            badgeLabel = 'SFB';
+        }
+
+        const el = document.createElement('div');
+        el.className = `bank-item ${b.symbol === currentBank ? 'active' : ''}`;
+        el.setAttribute('data-symbol', b.symbol);
+        el.onclick = () => {
+            document.querySelectorAll('.bank-item').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            updateDashboard(b.symbol, b.name);
+        };
+        
+        el.innerHTML = `
+            <div class="bi-head">
+                <div class="bi-name" style="display:flex; align-items:center;">
+                    ${b.name}
+                    <span class="bank-badge ${badgeClass}">${badgeLabel}</span>
+                </div>
+                <div class="bi-price">${formatPrice(livePrices[b.symbol])}</div>
+            </div>
+            <div class="bi-foot">
+                <div style="font-size:0.75rem; color:var(--text-muted);">${b.symbol}.NS</div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div>5D: <span class="${colorClass(b.expected_return)}">${sign(b.expected_return)}${formatPct(b.expected_return)}</span></div>
+                    <div class="f-dir-tag ${b.direction || ''}">${b.direction || 'WAIT'}</div>
+                </div>
+            </div>
+        `;
+        container.appendChild(el);
+    });
+
+    // Auto-select if nothing selected or currentBank is in filtered list
+    if (filtered.length > 0) {
+        if (!currentBank) {
+            filtered[0] && updateDashboard(filtered[0].symbol, filtered[0].name);
+            const firstEl = container.querySelector('.bank-item');
+            if (firstEl) firstEl.classList.add('active');
+        }
+    }
+}
+
 async function fetchBanks() {
     try {
         const res = await fetch(`${API_BASE}/banks`);
         const data = await res.json();
-        
-        const container = document.getElementById('bank-list');
-        container.innerHTML = '';
-        
-        data.forEach(b => {
-            // Save to live prices
-            if (!livePrices[b.symbol]) {
-                livePrices[b.symbol] = b.current_price;
-            }
-
-            const el = document.createElement('div');
-            el.className = `bank-item ${b.symbol === currentBank ? 'active' : ''}`;
-            el.setAttribute('data-symbol', b.symbol);
-            el.onclick = () => {
-                document.querySelectorAll('.bank-item').forEach(x => x.classList.remove('active'));
-                el.classList.add('active');
-                updateDashboard(b.symbol, b.name);
-            };
-            
-            el.innerHTML = `
-                <div class="bi-head">
-                    <div class="bi-name">${b.name}</div>
-                    <div class="bi-price">${formatPrice(livePrices[b.symbol])}</div>
-                </div>
-                <div class="bi-foot">
-                    <div>5D: <span class="${colorClass(b.expected_return)}">${sign(b.expected_return)}${formatPct(b.expected_return)}</span></div>
-                    <div class="f-dir-tag ${b.direction || ''}">${b.direction || 'WAIT'}</div>
-                </div>
-            `;
-            container.appendChild(el);
-        });
-        
-        // Auto-select first bank if none selected
-        if (!currentBank && data.length > 0) {
-            document.querySelector('.bank-item').click();
-        }
+        rawBanksList = data;
+        renderBankList();
     } catch (e) {
         console.error("Banks fetch failed", e);
     }
 }
+
 
 async function updateDashboard(symbol, name, animateChart = true) {
     currentBank = symbol;

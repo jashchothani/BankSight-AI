@@ -111,6 +111,8 @@ def get_banks():
             res.append({
                 "symbol": symbol,
                 "name": info["name"],
+                "type": info.get("type", "private"),
+                "category": info.get("category", "private"),
                 "current_price": pred.get("current_price"),
                 "prediction_5d": pred.get("prediction_5d"),
                 "expected_return": pred.get("return_5d"),
@@ -125,6 +127,8 @@ def get_banks():
             res.append({
                 "symbol": symbol,
                 "name": info["name"],
+                "type": info.get("type", "private"),
+                "category": info.get("category", "private"),
                 "current_price": float(price),
                 "expected_return": 0.0,
                 "direction": "UNKNOWN"

@@ -55,9 +55,26 @@
         </section>
 
         <div class="main-grid">
-            <!-- Left Column: Bank List -->
+            <!-- Left Column: Bank Universe -->
             <div class="col-left">
-                <h2>Top Banks</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="margin: 0; font-size: 1.1rem;">Banking Universe</h2>
+                    <span id="bank-count-pill" style="font-size: 0.72rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px;">27 Listed Banks</span>
+                </div>
+                
+                <div class="bank-controls">
+                    <div class="bank-search-bar">
+                        <input type="text" id="bank-search-input" class="bank-search-input" placeholder="🔍 Search by name or ticker (e.g. Canara, PNB)...">
+                    </div>
+                    <div class="bank-filter-tabs">
+                        <button type="button" class="filter-pill active" data-filter="all">All (27)</button>
+                        <button type="button" class="filter-pill" data-filter="nifty_bank">Nifty Bank (12)</button>
+                        <button type="button" class="filter-pill" data-filter="psu">PSU Banks (8)</button>
+                        <button type="button" class="filter-pill" data-filter="private">Private (12)</button>
+                        <button type="button" class="filter-pill" data-filter="sfb">SFBs (3)</button>
+                    </div>
+                </div>
+
                 <div id="bank-list" class="bank-list">
                     <!-- JS populated -->
                     <div class="loading">Loading banks...</div>
