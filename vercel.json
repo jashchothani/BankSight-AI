@@ -1,9 +1,6 @@
 {
   "version": 2,
   "cleanUrls": true,
-  "installCommand": "echo 'Static frontend only - backend runs on Render'",
-  "buildCommand": null,
-  "outputDirectory": "dashboard",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -11,19 +8,23 @@
     },
     {
       "source": "/terminal",
-      "destination": "/index.html"
+      "destination": "/dashboard/index.html"
     },
     {
       "source": "/copilot",
-      "destination": "/manual.html"
+      "destination": "/dashboard/manual.html"
     },
     {
       "source": "/manual",
-      "destination": "/manual.html"
+      "destination": "/dashboard/manual.html"
     },
     {
       "source": "/",
-      "destination": "/manual.html"
+      "destination": "/dashboard/manual.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/dashboard/$1"
     }
   ]
 }
