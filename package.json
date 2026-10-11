@@ -1,0 +1,9 @@
+{
+  "name": "banksight-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BankSight AI - Next-Gen Banking Intelligence & NVIDIA NIM AI Copilot",
+  "scripts": {
+    "build": "echo 'BankSight AI frontend static assets ready'"
+  }
+}
