@@ -94,6 +94,9 @@ In `vercel.json` and `dashboard/vercel.json`, replace `https://YOUR_RENDER_BACKE
 {
   "version": 2,
   "cleanUrls": true,
+  "installCommand": "echo 'Static frontend only - backend runs on Render'",
+  "buildCommand": null,
+  "outputDirectory": "dashboard",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -101,23 +104,19 @@ In `vercel.json` and `dashboard/vercel.json`, replace `https://YOUR_RENDER_BACKE
     },
     {
       "source": "/terminal",
-      "destination": "/dashboard/index.html"
+      "destination": "/index.html"
     },
     {
       "source": "/copilot",
-      "destination": "/dashboard/manual.html"
+      "destination": "/manual.html"
     },
     {
       "source": "/manual",
-      "destination": "/dashboard/manual.html"
+      "destination": "/manual.html"
     },
     {
       "source": "/",
-      "destination": "/dashboard/manual.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/dashboard/$1"
+      "destination": "/manual.html"
     }
   ]
 }

@@ -1,0 +1,18 @@
+# Ignore backend files, Python dependencies, and ML models on Vercel
+requirements.txt
+runtime.txt
+pyproject.toml
+Pipfile*
+app.py
+config.py
+src/
+models/
+db/
+data/
+*.py
+*.db
+render.yaml
+Procfile
+analysis_package/
+BankSight_AI_LaTeX_Source_FINAL/
+scratch/
