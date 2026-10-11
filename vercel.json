@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
   "cleanUrls": true,
   "rewrites": [
     {
@@ -9,19 +8,19 @@
     },
     {
       "source": "/terminal",
-      "destination": "/dashboard/index.html"
+      "destination": "/dashboard/terminal.html"
     },
     {
       "source": "/copilot",
-      "destination": "/dashboard/manual.html"
+      "destination": "/dashboard/index.html"
     },
     {
       "source": "/manual",
-      "destination": "/dashboard/manual.html"
+      "destination": "/dashboard/index.html"
     },
     {
       "source": "/",
-      "destination": "/dashboard/manual.html"
+      "destination": "/dashboard/index.html"
     },
     {
       "source": "/(.*)",

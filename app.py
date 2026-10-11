@@ -41,13 +41,13 @@ evaluator = Evaluator(db)
 
 @app.route("/")
 def index():
-    return send_from_directory(app.static_folder, "manual.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 @app.route("/manual")
 @app.route("/manual.html")
 @app.route("/website")
 def serve_manual():
-    return send_from_directory(app.static_folder, "manual.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 @app.route("/copilot")
 @app.route("/chatbot")
@@ -59,7 +59,7 @@ def serve_copilot():
 @app.route("/dashboard")
 @app.route("/app")
 def serve_terminal():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "terminal.html")
 
 @app.route("/banks/<path:path>")
 def serve_bank_logo_alias(path):
