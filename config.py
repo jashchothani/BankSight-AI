@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # ---------------------------------------------------------------------------
 # Load .env (if present)
 # ---------------------------------------------------------------------------
-load_dotenv()
+load_dotenv(override=True)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -59,13 +59,15 @@ MARKET_DATA_API_KEY = os.getenv("MARKET_DATA_API_KEY", "")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 MACRO_API_KEY = os.getenv("MACRO_API_KEY", "")
 
-# SMTP Configuration for Email Alerts
-SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+# SMTP Configuration for Email Alerts (Defaults to Brevo SMTP Relay on port 2525 for Render)
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp-relay.brevo.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "2525"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-SMTP_FROM = os.getenv("SMTP_FROM", os.getenv("SMTP_USER", "alerts@banksight.ai"))
-
+# NVIDIA NIM Accelerated AI Configuration
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "")
+NVIDIA_BASE_URL = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
+NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "meta/llama-3.2-11b-vision-instruct")
 
 # ---------------------------------------------------------------------------
 # Stocks — Configurable list of Indian banking stocks

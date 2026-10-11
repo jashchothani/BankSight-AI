@@ -64,16 +64,14 @@ class Predictor:
         features_dict = json.loads(row["features_json"])
         feat_df = pd.DataFrame([features_dict])
         
-        # Ensure latest price exists
-        current_price = feat_df["close"].iloc[0] if "close" in feat_df.columns else None
-        
-        if current_price is None:
-            # Fallback to market data
-            md = self.db.get_market_data(symbol)
-            if not md.empty:
-                current_price = md["close"].iloc[-1]
-            else:
-                return None
+        # Ensure latest price exists: prioritize latest close from market_data
+        md = self.db.get_market_data(symbol)
+        if not md.empty:
+            current_price = float(md["close"].iloc[-1])
+        elif "close" in feat_df.columns:
+            current_price = float(feat_df["close"].iloc[0])
+        else:
+            return None
 
         pred_id = uuid.uuid4().hex[:12]
         

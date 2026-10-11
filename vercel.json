@@ -7,6 +7,22 @@
       "destination": "https://YOUR_RENDER_BACKEND.onrender.com/api/$1"
     },
     {
+      "source": "/terminal",
+      "destination": "/dashboard/index.html"
+    },
+    {
+      "source": "/copilot",
+      "destination": "/dashboard/manual.html"
+    },
+    {
+      "source": "/manual",
+      "destination": "/dashboard/manual.html"
+    },
+    {
+      "source": "/",
+      "destination": "/dashboard/manual.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/dashboard/$1"
     }

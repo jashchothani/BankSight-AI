@@ -5,6 +5,22 @@
     {
       "source": "/api/(.*)",
       "destination": "https://YOUR_RENDER_BACKEND.onrender.com/api/$1"
+    },
+    {
+      "source": "/terminal",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/copilot",
+      "destination": "/manual.html"
+    },
+    {
+      "source": "/manual",
+      "destination": "/manual.html"
+    },
+    {
+      "source": "/",
+      "destination": "/manual.html"
     }
   ]
 }

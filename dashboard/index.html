@@ -4,354 +4,650 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BankSight AI | Explainable Indian Banking Intelligence Terminal</title>
+    <meta name="description" content="Institutional-grade Explainable AI Terminal for Indian banking equities with SHAP attribution, multi-horizon predictive modeling, and live macro sentiment analytics.">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.3.0">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div id="error-banner" class="banner error hidden">
-        LIVE MARKET DATA UNAVAILABLE — Market-data provider is currently offline or rate-limited.
+    <!-- Splash Loading Screen with Animated BankSight AI Logo -->
+    <div id="splash-screen">
+        <div class="splash-logo-container">
+            <div class="splash-logo-glow"></div>
+            <div class="splash-logo-ring"></div>
+            <img src="/assets/logo.jpg" alt="BankSight AI Logo" class="splash-logo-img" onerror="this.style.display='none'; document.getElementById('splash-logo-fallback').style.display='flex';">
+            <div id="splash-logo-fallback" class="splash-logo-fallback" style="display:none;">BS</div>
+        </div>
+        <div class="splash-brand">BankSight <span>AI</span></div>
+        <div class="splash-badge">INSTITUTIONAL BANKING INTELLIGENCE TERMINAL</div>
+        <div class="splash-subtitle">Connecting to Indian Equity Feeds & Initializing SHAP Neural Attribution...</div>
+        <div class="splash-loader"></div>
+        <div class="splash-version">v3.2 PRO · BSE / NSE BANKING COVERAGE</div>
     </div>
 
-    <!-- Header Navigation -->
-    <header>
-        <a href="/" class="logo">
-            <div class="logo-icon">BS</div>
-            <div>
-                <h1>BankSight <span>AI</span></h1>
-                <p>Explainable Indian Banking Market Intelligence</p>
-            </div>
-        </a>
-        <div class="status-panel">
-            <div class="status-item">
-                <span class="dot green"></span>
-                <span>Source: <strong id="data-source-text">Yahoo Finance</strong></span>
-            </div>
-            <div class="status-item">
-                <span class="dot pulsing-dot" id="status-market-open"></span>
-                <span>Market: <strong id="market-status-text">--</strong></span>
-            </div>
-            <div class="status-item">
-                <span class="dot" id="status-market"></span>
-                <span>Market Data</span>
-            </div>
-            <div class="status-item">
-                <span class="dot" id="status-news"></span>
-                <span>News</span>
-            </div>
-            <div class="status-item">
-                <span class="dot" id="status-model"></span>
-                <span>Model</span>
-            </div>
-            <div class="status-item" id="backend-status-item" style="cursor: pointer;" title="Configure Render backend API URL or test SMTP">
-                <span class="dot" id="status-backend"></span>
-                <span>Backend: <strong id="backend-label">Connecting</strong> ⚙️</span>
-            </div>
-            <a href="/manual" class="btn-nav-manual" target="_blank" title="View Complete User Manual & Technical Architecture Guide">
-                <span>📖 User Manual</span>
+    <!-- Particle Background Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div id="error-banner" class="banner error hidden" style="display: none;"></div>
+
+    <!-- Ultra-Sleek Institutional Terminal Top Header -->
+    <header class="terminal-header">
+        <div class="header-left">
+            <a href="/" class="brand-logo" title="BankSight AI Terminal">
+                <div class="brand-icon-wrapper">
+                    <div class="brand-icon-ring"></div>
+                    <img src="/assets/logo.jpg" alt="BankSight AI Logo" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('header-fallback-logo').style.display='flex';">
+                    <div id="header-fallback-logo" class="brand-logo-fallback" style="display:none;">BS</div>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">BankSight <span class="ai-gradient">AI</span></div>
+                    <div class="brand-caption">
+                        <span class="badge-terminal">TERMINAL PRO</span>
+                        <span class="caption-divider">•</span>
+                        <span>INDIAN BANKING</span>
+                    </div>
+                </div>
             </a>
-            <button class="theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">🌙</button>
-            <div class="status-time">IST: <span id="last-update-time">--:--:--</span></div>
+        </div>
+
+        <!-- Integrated Live Benchmark Ticker Ribbon -->
+        <div class="header-ticker-strip">
+            <div class="ticker-chip chip-nifty" id="chip-nifty" title="NIFTY 50 Benchmark Index">
+                <div class="chip-top">
+                    <span class="chip-label">NIFTY 50</span>
+                    <span class="chip-tag">BENCHMARK</span>
+                </div>
+                <div class="chip-bottom">
+                    <span class="chip-val" id="nifty-val">--</span>
+                    <span class="chip-chg" id="nifty-change">--</span>
+                </div>
+            </div>
+
+            <div class="ticker-chip chip-banknifty" id="chip-banknifty" title="NIFTY BANK Sector Index">
+                <div class="chip-top">
+                    <span class="chip-label">BANK NIFTY</span>
+                    <span class="chip-tag tag-purple">SECTORAL</span>
+                </div>
+                <div class="chip-bottom">
+                    <span class="chip-val" id="banknifty-val">--</span>
+                    <span class="chip-chg" id="banknifty-change">--</span>
+                </div>
+            </div>
+
+            <div class="ticker-chip chip-vix" id="chip-vix" title="India Volatility Index">
+                <div class="chip-top">
+                    <span class="chip-label">INDIA VIX</span>
+                    <span class="chip-tag tag-amber">VOLATILITY</span>
+                </div>
+                <div class="chip-bottom">
+                    <span class="chip-val" id="vix-val">--</span>
+                    <span class="chip-chg" id="vix-change">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Actions & Controls -->
+        <div class="header-right">
+            <!-- Market Status & Clock -->
+            <div class="status-clock-box">
+                <div class="market-status-pill" title="NSE Indian Stock Market Trading Hours (Mon-Fri 09:15-15:30 IST)">
+                    <span class="dot pulsing-dot" id="status-market-open"></span>
+                    <span>NSE: <strong id="market-status-text">--</strong></span>
+                </div>
+                <div class="clock-display">
+                    <span class="clock-label">IST</span>
+                    <span id="last-update-time" class="clock-digits">--:--:--</span>
+                </div>
+            </div>
+
+            <!-- System Telemetry Status Dots -->
+            <div class="telemetry-bar" title="Real-time Subsystem Health Status">
+                <div class="telemetry-item" title="Market Data Provider">
+                    <span class="dot" id="status-market"></span>
+                    <span class="telemetry-name">Data</span>
+                </div>
+                <div class="telemetry-item" title="News & Sentiment Stream">
+                    <span class="dot" id="status-news"></span>
+                    <span class="telemetry-name">News</span>
+                </div>
+                <div class="telemetry-item" title="Explainable AI Ensemble Inference Engine">
+                    <span class="dot" id="status-model"></span>
+                    <span class="telemetry-name">Model</span>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="header-buttons">
+                <!-- Sound Alert Toggle -->
+                <button type="button" class="btn-icon" id="sound-toggle-btn" title="Toggle Terminal Audio Clicks/Alerts">
+                    <span id="sound-icon">🔔</span>
+                </button>
+
+                <!-- Cloud Backend Status / Config -->
+                <button type="button" class="btn-compact btn-backend-status" id="backend-status-item" title="Configure Cloud Backend API URL or Test SMTP Alerts">
+                    <span class="dot" id="status-backend"></span>
+                    <span id="backend-label">Connected</span>
+                    <span class="gear-icon">⚙️</span>
+                </button>
+
+                <!-- Official Website Link -->
+                <a href="/" class="btn-compact btn-manual" title="Go to BankSight AI Website & Overview">
+                    <span>🌐 Website</span>
+                </a>
+
+                <!-- Theme Toggle Button -->
+                <button type="button" class="theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode">🌙</button>
+            </div>
         </div>
     </header>
 
-    <main>
-        <!-- Market Overview (Nifty, Bank Nifty, India VIX) -->
-        <section class="overview">
-            <div class="market-card mc-nifty">
-                <div class="market-card-head">
-                    <h3>NIFTY 50</h3>
-                    <span class="mc-pill">BENCHMARK</span>
-                </div>
-                <div class="val" id="nifty-val">--</div>
-                <div class="change" id="nifty-change">--</div>
-            </div>
-            <div class="market-card mc-banknifty">
-                <div class="market-card-head">
-                    <h3>BANK NIFTY</h3>
-                    <span class="mc-pill">SECTORAL</span>
-                </div>
-                <div class="val" id="banknifty-val">--</div>
-                <div class="change" id="banknifty-change">--</div>
-            </div>
-            <div class="market-card mc-vix">
-                <div class="market-card-head">
-                    <h3>INDIA VIX</h3>
-                    <span class="mc-pill">VOLATILITY</span>
-                </div>
-                <div class="val" id="vix-val">--</div>
-                <div class="change" id="vix-change">--</div>
-            </div>
-        </section>
+    <!-- Hidden audio elements for interactive terminal feedback -->
+    <span id="data-source-text" style="display:none;">Yahoo Finance</span>
 
-        <div class="main-grid">
-            <!-- Left Column: Bank Universe Directory -->
-            <div class="col-left">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h2>Banking Universe</h2>
-                    <span id="bank-count-pill" class="mc-pill" style="color: var(--accent); border-color: var(--accent-glow);">27 Listed Banks</span>
-                </div>
-                
-                <div class="bank-controls">
-                    <div class="bank-search-bar">
-                        <svg class="search-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <input type="text" id="bank-search-input" class="bank-search-input" placeholder="Search bank or ticker (e.g. SBI, HDFC, Canara)...">
+    <!-- Main Multi-Column Trading Workstation Layout -->
+    <main class="terminal-workspace">
+        <div class="terminal-grid">
+            <!-- ══════════════════════════════════════════════════════════
+                 COL 1: BANKING UNIVERSE WATCHLIST & SELECTOR (290px)
+                 ══════════════════════════════════════════════════════════ -->
+            <aside class="col-watchlist">
+                <div class="watchlist-header">
+                    <div class="watchlist-title-row">
+                        <div class="section-title">
+                            <span class="title-icon">🏛️</span>
+                            <h2>Banking Universe</h2>
+                        </div>
+                        <span id="bank-count-pill" class="pill-counter">27 Listed</span>
                     </div>
-                    <div class="bank-filter-tabs">
+
+                    <!-- Search Input -->
+                    <div class="search-box">
+                        <svg class="search-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="bank-search-input" class="search-input" placeholder="Search SBI, HDFC, Canara..." autocomplete="off">
+                        <button type="button" id="search-clear-btn" class="search-clear-btn hidden" title="Clear search">&times;</button>
+                    </div>
+
+                    <!-- Category Filter Tabs -->
+                    <div class="filter-strip bank-filter-tabs">
                         <button type="button" class="filter-pill active" data-filter="all">All (27)</button>
-                        <button type="button" class="filter-pill" data-filter="nifty_bank">Nifty Bank (12)</button>
-                        <button type="button" class="filter-pill" data-filter="psu">PSU Banks (8)</button>
-                        <button type="button" class="filter-pill" data-filter="private">Private (12)</button>
-                        <button type="button" class="filter-pill" data-filter="sfb">SFBs (3)</button>
+                        <button type="button" class="filter-pill" data-filter="nifty_bank">Nifty (12)</button>
+                        <button type="button" class="filter-pill" data-filter="psu">PSU (8)</button>
+                        <button type="button" class="filter-pill" data-filter="private">Pvt (12)</button>
+                        <button type="button" class="filter-pill" data-filter="sfb">SFB (3)</button>
                     </div>
                 </div>
 
-                <div id="bank-list" class="bank-list">
-                    <div class="placeholder">Loading banking universe...</div>
+                <!-- Scrollable Bank Watchlist Items -->
+                <div id="bank-list" class="watchlist-scroll-container">
+                    <div class="terminal-placeholder">
+                        <div class="loading-spinner"></div>
+                        <span>Loading banking universe...</span>
+                    </div>
                 </div>
-                
-                <!-- Daily Price Alerts Box -->
-                <div class="alert-subscription-box">
-                    <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-                        <span>🔔</span> Daily Market Briefings
-                    </h3>
-                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-                        Get automated morning research briefings sent to your inbox whenever high-conviction bullish setups are detected.
-                    </p>
-                    <form id="subscribe-form" style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="email" id="subscribe-email" class="bank-search-input" placeholder="name@domain.com" required style="padding: 8px 12px;">
-                        <button type="submit" id="subscribe-btn" class="btn btn-primary" style="justify-content: center; width: 100%;">
-                            Subscribe Alerts
-                        </button>
+
+                <!-- Compact Morning Briefing Alert Box -->
+                <div class="morning-briefing-card">
+                    <div class="briefing-head">
+                        <span class="briefing-icon">⚡</span>
+                        <div class="briefing-title">Daily Research Alerts</div>
+                    </div>
+                    <p class="briefing-desc">Receive automated pre-market AI briefings when high-conviction setups trigger.</p>
+                    <form id="subscribe-form" class="briefing-form">
+                        <div class="briefing-input-group">
+                            <input type="email" id="subscribe-email" class="briefing-input" placeholder="trader@firm.com" required>
+                            <button type="submit" id="subscribe-btn" class="briefing-btn" title="Subscribe Alerts">Sub</button>
+                        </div>
                     </form>
-                    <div id="subscribe-status" style="font-size: 0.75rem; margin-top: 8px; text-align: center;" class="hidden"></div>
+                    <div id="subscribe-status" class="briefing-status hidden"></div>
                 </div>
-            </div>
+            </aside>
 
-            <!-- Middle Column: Detail View, Multi-Horizon Forecasts & Interactive Chart -->
-            <div class="col-main">
-                <div class="detail-header">
-                    <div>
-                        <div class="bank-title-row">
-                            <div id="detail-avatar" class="bank-avatar avatar-nifty">--</div>
-                            <h2 id="detail-name">Select a Bank</h2>
+            <!-- ══════════════════════════════════════════════════════════
+                 COL 2: MAIN INTELLIGENCE TERMINAL & CHARTING (FLEX 1FR)
+                 ══════════════════════════════════════════════════════════ -->
+            <section class="col-terminal-main">
+                <!-- Active Bank Terminal Header -->
+                <div class="active-stock-header">
+                    <div class="stock-info-left">
+                        <div class="stock-logo-box" id="detail-avatar-container">
+                            <div id="detail-avatar" class="bank-logo-element">--</div>
                         </div>
-                        <div id="detail-ticker" class="ticker-label">--.NS</div>
+                        <div class="stock-identity">
+                            <div class="stock-name-row">
+                                <h1 id="detail-name" class="stock-name">Select a Bank</h1>
+                                <span id="detail-category-badge" class="stock-category-badge">NIFTY BANK</span>
+                            </div>
+                            <div class="stock-ticker-row">
+                                <span id="detail-ticker" class="stock-ticker">--.NS</span>
+                                <span class="dot-separator">•</span>
+                                <span class="stock-exchange">NSE / BSE</span>
+                                <span class="dot-separator">•</span>
+                                <span class="stock-currency">INR ₹</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="detail-price-box">
-                        <div class="detail-price" id="detail-price">--</div>
-                        <div class="report-actions">
-                            <button id="download-report-btn" class="btn btn-primary" disabled title="Generate publication-grade PDF intelligence report">
-                                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download PDF
+
+                    <!-- Realtime Price & Actions -->
+                    <div class="stock-price-right">
+                        <div class="stock-price-block">
+                            <div class="price-super" id="detail-price">--</div>
+                            <div class="price-sub" id="detail-day-change">
+                                <span id="detail-change-val">--</span>
+                                <span class="price-live-indicator">LIVE</span>
+                            </div>
+                        </div>
+                        <div class="stock-actions">
+                            <button id="download-report-btn" class="btn-action btn-pdf" disabled title="Download Institutional Vector PDF Research Dossier">
+                                <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>PDF Report</span>
                             </button>
-                            <button id="email-report-btn" class="btn btn-secondary" disabled title="Email research report to your inbox">
-                                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                                Email Report
+                            <button id="email-report-btn" class="btn-action btn-email" disabled title="Send Research Dossier via Email Briefing">
+                                <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                <span>Email Brief</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="price-summary-bar">
-                    <div class="price-item">Open: <span id="summary-open" class="price-val">--</span></div>
-                    <div class="price-item">High: <span id="summary-high" class="price-val">--</span></div>
-                    <div class="price-item">Low: <span id="summary-low" class="price-val">--</span></div>
-                    <div class="price-item">Close: <span id="summary-close" class="price-val">--</span></div>
-                </div>
-
-                <!-- 4 Multi-Horizon Forecast Cards (Clickable for Deep-Dive Explainability) -->
-                <div class="forecast-cards">
-                    <div class="f-card active-horizon" id="f-card-1d" data-horizon="1d" title="Click to inspect 1-Day AI Explainability Decomposition">
-                        <div class="f-label"><span>⚡</span> 1D Forecast</div>
-                        <div class="f-price" id="detail-f1d-price">--</div>
-                        <div class="f-ret" id="detail-f1d-ret">--</div>
-                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f1d-bar" style="width: 0%;"></div></div>
-                        <div class="f-conf" id="detail-f1d-conf">Conf: --%</div>
-                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
+                <!-- Session Metrics Bar (OHLC + Range) -->
+                <div class="session-metrics-bar">
+                    <div class="metric-cell">
+                        <span class="metric-label">OPEN</span>
+                        <span class="metric-value" id="summary-open">--</span>
                     </div>
-                    <div class="f-card" id="f-card-3d" data-horizon="3d" title="Click to inspect 3-Day AI Explainability Decomposition">
-                        <div class="f-label"><span>📈</span> 3D Forecast</div>
-                        <div class="f-price" id="detail-f3d-price">--</div>
-                        <div class="f-ret" id="detail-f3d-ret">--</div>
-                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f3d-bar" style="width: 0%;"></div></div>
-                        <div class="f-conf" id="detail-f3d-conf">Conf: --%</div>
-                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
+                    <div class="metric-cell">
+                        <span class="metric-label">HIGH</span>
+                        <span class="metric-value" id="summary-high">--</span>
                     </div>
-                    <div class="f-card" id="f-card-5d" data-horizon="5d" title="Click to inspect 5-Day AI Explainability Decomposition">
-                        <div class="f-label"><span>🎯</span> 5D Forecast</div>
-                        <div class="f-price" id="detail-f5d-price">--</div>
-                        <div class="f-ret" id="detail-f5d-ret">--</div>
-                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f5d-bar" style="width: 0%;"></div></div>
-                        <div class="f-conf" id="detail-f5d-conf">Conf: --%</div>
-                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
+                    <div class="metric-cell">
+                        <span class="metric-label">LOW</span>
+                        <span class="metric-value" id="summary-low">--</span>
                     </div>
-                    <div class="f-card" id="f-card-7d" data-horizon="7d" title="Click to inspect 7-Day AI Explainability Decomposition">
-                        <div class="f-label"><span>🧭</span> 7D Forecast</div>
-                        <div class="f-price" id="detail-f7d-price">--</div>
-                        <div class="f-ret" id="detail-f7d-ret">--</div>
-                        <div class="f-conf-bar"><div class="f-conf-fill" id="detail-f7d-bar" style="width: 0%;"></div></div>
-                        <div class="f-conf" id="detail-f7d-conf">Conf: --%</div>
-                        <div class="f-hint-btn">🔍 Click for AI Explanation</div>
+                    <div class="metric-cell">
+                        <span class="metric-label">PREV CLOSE</span>
+                        <span class="metric-value" id="summary-close">--</span>
+                    </div>
+                    <div class="metric-cell metric-range-cell">
+                        <span class="metric-label">DAY RANGE</span>
+                        <div class="range-bar-track">
+                            <div class="range-bar-fill" id="summary-day-range-fill" style="width: 50%;"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Interactive Chart Timeline Box -->
-                <div class="chart-container-box">
-                    <div class="chart-header-row">
-                        <h2>Interactive Multi-Horizon Timeline</h2>
-                        <div class="chart-caption">
-                            <span>💡</span>
-                            <span>Click any historical node or forecast dot (+1D, +3D, +5D, +7D) for AI Explainability</span>
+                <!-- 4 Multi-Horizon Predictive Intelligence Cards -->
+                <div class="forecast-deck">
+                    <div class="f-deck-header">
+                        <div class="f-deck-title">
+                            <span>🎯 Multi-Horizon Forecast Ensembles</span>
+                            <span class="f-deck-subtitle">Click any horizon to decompose AI attribution & feature impacts</span>
+                        </div>
+                        <div class="f-deck-hint">
+                            <span class="pulse-ring"></span>
+                            <span>Interactive SHAP Drivers</span>
+                        </div>
+                    </div>
+
+                    <div class="forecast-cards">
+                        <!-- 1-Day Forecast -->
+                        <div class="f-card active-horizon" id="f-card-1d" data-horizon="1d" title="Click to view 1-Day AI Explainability Decomposition">
+                            <div class="f-card-top">
+                                <span class="f-badge">1-DAY</span>
+                                <span class="f-horizon-label">NEXT SESSION</span>
+                            </div>
+                            <div class="f-price" id="detail-f1d-price">--</div>
+                            <div class="f-ret-row">
+                                <span class="f-ret" id="detail-f1d-ret">--</span>
+                            </div>
+                            <div class="f-conf-container">
+                                <div class="f-conf-bar">
+                                    <div class="f-conf-fill" id="detail-f1d-bar" style="width: 0%;"></div>
+                                </div>
+                                <div class="f-conf-text" id="detail-f1d-conf">Conf: --%</div>
+                            </div>
+                            <div class="f-card-action">
+                                <span>🔍 Decompose 1D SHAP</span>
+                            </div>
+                        </div>
+
+                        <!-- 3-Day Forecast -->
+                        <div class="f-card" id="f-card-3d" data-horizon="3d" title="Click to view 3-Day AI Explainability Decomposition">
+                            <div class="f-card-top">
+                                <span class="f-badge">3-DAY</span>
+                                <span class="f-horizon-label">MID-WEEK</span>
+                            </div>
+                            <div class="f-price" id="detail-f3d-price">--</div>
+                            <div class="f-ret-row">
+                                <span class="f-ret" id="detail-f3d-ret">--</span>
+                            </div>
+                            <div class="f-conf-container">
+                                <div class="f-conf-bar">
+                                    <div class="f-conf-fill" id="detail-f3d-bar" style="width: 0%;"></div>
+                                </div>
+                                <div class="f-conf-text" id="detail-f3d-conf">Conf: --%</div>
+                            </div>
+                            <div class="f-card-action">
+                                <span>🔍 Decompose 3D SHAP</span>
+                            </div>
+                        </div>
+
+                        <!-- 5-Day Forecast -->
+                        <div class="f-card" id="f-card-5d" data-horizon="5d" title="Click to view 5-Day AI Explainability Decomposition">
+                            <div class="f-card-top">
+                                <span class="f-badge">5-DAY</span>
+                                <span class="f-horizon-label">WEEKLY SWING</span>
+                            </div>
+                            <div class="f-price" id="detail-f5d-price">--</div>
+                            <div class="f-ret-row">
+                                <span class="f-ret" id="detail-f5d-ret">--</span>
+                            </div>
+                            <div class="f-conf-container">
+                                <div class="f-conf-bar">
+                                    <div class="f-conf-fill" id="detail-f5d-bar" style="width: 0%;"></div>
+                                </div>
+                                <div class="f-conf-text" id="detail-f5d-conf">Conf: --%</div>
+                            </div>
+                            <div class="f-card-action">
+                                <span>🔍 Decompose 5D SHAP</span>
+                            </div>
+                        </div>
+
+                        <!-- 7-Day Forecast -->
+                        <div class="f-card" id="f-card-7d" data-horizon="7d" title="Click to view 7-Day AI Explainability Decomposition">
+                            <div class="f-card-top">
+                                <span class="f-badge">7-DAY</span>
+                                <span class="f-horizon-label">FORTNIGHTLY</span>
+                            </div>
+                            <div class="f-price" id="detail-f7d-price">--</div>
+                            <div class="f-ret-row">
+                                <span class="f-ret" id="detail-f7d-ret">--</span>
+                            </div>
+                            <div class="f-conf-container">
+                                <div class="f-conf-bar">
+                                    <div class="f-conf-fill" id="detail-f7d-bar" style="width: 0%;"></div>
+                                </div>
+                                <div class="f-conf-text" id="detail-f7d-conf">Conf: --%</div>
+                            </div>
+                            <div class="f-card-action">
+                                <span>🔍 Decompose 7D SHAP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Multi-Horizon Financial Chart Terminal -->
+                <div class="chart-box">
+                    <div class="chart-toolbar">
+                        <div class="chart-title-area">
+                            <h2 class="chart-heading">Interactive Multi-Horizon Price Trajectory</h2>
+                            <span class="chart-caption-badge">
+                                <span class="caption-dot"></span>
+                                <span>Click historical candles or forecast nodes (+1D, +3D, +5D, +7D) for Deep-Dive Forensics</span>
+                            </span>
+                        </div>
+                        <div class="chart-controls-row">
+                            <div class="chart-legend-pills">
+                                <span class="legend-pill pill-hist"><span class="legend-dot"></span> Historical Close</span>
+                                <span class="legend-pill pill-proj"><span class="legend-dot dot-dashed"></span> AI Trajectory</span>
+                                <span class="legend-pill pill-cone"><span class="legend-dot dot-cone"></span> Confidence Channel</span>
+                            </div>
                         </div>
                     </div>
                     <div class="chart-canvas-wrap">
                         <canvas id="forecastChart"></canvas>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Right Column: Explainable AI & Intelligence -->
-            <div class="col-right">
-                <!-- Deep-Dive Explainability & Candle Forensics Side Panel -->
-                <div id="forensic-panel" class="hidden">
-                    <div class="panel-header">
-                        <div>
-                            <span id="forensic-mode-pill" class="mc-pill">AI EXPLAINABILITY</span>
-                            <h2 id="forensic-title" style="margin-top: 4px;">Prediction Decomposition</h2>
+            <!-- ══════════════════════════════════════════════════════════
+                 COL 3: EXPLAINABLE AI & FORENSIC INTELLIGENCE DECK (340px)
+                 ══════════════════════════════════════════════════════════ -->
+            <aside class="col-intelligence-right">
+                <!-- Deep-Dive Explainability & Candle Forensics Drawer (Toggles on Node Click) -->
+                <div id="forensic-panel" class="forensic-drawer hidden">
+                    <div class="drawer-header">
+                        <div class="drawer-header-left">
+                            <span id="forensic-mode-pill" class="pill-forensic">AI EXPLAINABILITY</span>
+                            <h3 id="forensic-title" class="drawer-title">Prediction Decomposition</h3>
                         </div>
-                        <button id="close-forensic-btn" class="close-btn" title="Close Panel">&times;</button>
+                        <button type="button" id="close-forensic-btn" class="drawer-close-btn" title="Close Panel">&times;</button>
                     </div>
-                    <div class="forensic-body">
-                        <div class="forensic-section" id="forensic-target-meta">
-                            <h3 id="forensic-target-heading">Target Horizon: <span id="forensic-date" style="color: var(--accent);">--</span></h3>
-                            <div class="forensic-ohlcv-grid" id="forensic-metrics-grid">
-                                <div>Predicted: <span id="forensic-open">--</span></div>
-                                <div>Expected Move: <span id="forensic-close">--</span></div>
-                                <div>Confidence: <span id="forensic-high">--</span></div>
-                                <div>Model Type: <span id="forensic-low">Ensemble</span></div>
-                                <div>Volume/Beta: <span id="forensic-volume">--</span></div>
+
+                    <div class="drawer-scroll-body">
+                        <!-- Node Target Meta -->
+                        <div class="drawer-section" id="forensic-target-meta">
+                            <div class="section-subhead">
+                                <span id="forensic-target-heading">Horizon Target: <strong id="forensic-date" class="text-accent">--</strong></span>
+                            </div>
+                            <div class="forensic-stat-grid" id="forensic-metrics-grid">
+                                <div class="stat-cell">
+                                    <span class="stat-lbl">Target:</span>
+                                    <span class="stat-val" id="forensic-open">--</span>
+                                </div>
+                                <div class="stat-cell">
+                                    <span class="stat-lbl">Exp Move:</span>
+                                    <span class="stat-val" id="forensic-close">--</span>
+                                </div>
+                                <div class="stat-cell">
+                                    <span class="stat-lbl">Confidence:</span>
+                                    <span class="stat-val" id="forensic-high">--</span>
+                                </div>
+                                <div class="stat-cell">
+                                    <span class="stat-lbl">Ensemble:</span>
+                                    <span class="stat-val" id="forensic-low">CatBoost + XGB</span>
+                                </div>
+                                <div class="stat-cell stat-span-2">
+                                    <span class="stat-lbl">Beta / Vol:</span>
+                                    <span class="stat-val" id="forensic-volume">--</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="forensic-section">
-                            <h3>Market &amp; Sector Context</h3>
-                            <div id="forensic-market-context" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">--</div>
+
+                        <!-- Market & Sector Context -->
+                        <div class="drawer-section">
+                            <div class="section-subhead">Market &amp; Sector Regime</div>
+                            <div id="forensic-market-context" class="forensic-narrative">--</div>
                         </div>
-                        <div class="forensic-section">
-                            <h3>Key Signal Attributions (SHAP)</h3>
-                            <ul id="forensic-tech-list" style="padding-left: 0; list-style: none;">
-                                <!-- JS populated -->
+
+                        <!-- Technical Signal Attributions -->
+                        <div class="drawer-section">
+                            <div class="section-subhead">Key Signal Attributions (SHAP)</div>
+                            <ul id="forensic-tech-list" class="forensic-factor-list">
+                                <!-- Populated dynamically by JS -->
                             </ul>
                         </div>
-                        <div class="forensic-section">
-                            <h3>Causal News Drivers</h3>
-                            <div id="forensic-news-list">
-                                <!-- JS populated -->
+
+                        <!-- Causal News Drivers -->
+                        <div class="drawer-section">
+                            <div class="section-subhead">Causal News Drivers</div>
+                            <div id="forensic-news-list" class="forensic-news-container">
+                                <!-- Populated dynamically by JS -->
                             </div>
                         </div>
-                        <div class="forensic-section">
-                            <h3>Historical Similar Scenarios</h3>
-                            <div id="forensic-similarity-stats" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">--</div>
+
+                        <!-- Historical Scenario Similarity -->
+                        <div class="drawer-section">
+                            <div class="section-subhead">Historical Analog Matches</div>
+                            <div id="forensic-similarity-stats" class="forensic-narrative">--</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Primary SHAP Factor Importance Panel -->
-                <div class="panel">
-                    <div class="panel-title-row">
-                        <h2>Why? <span class="subtitle">Feature Attribution</span></h2>
-                        <div class="bank-filter-tabs" id="explain-horizon-tabs">
-                            <button type="button" class="filter-pill active" data-h="1d">1D</button>
-                            <button type="button" class="filter-pill" data-h="3d">3D</button>
-                            <button type="button" class="filter-pill" data-h="5d">5D</button>
-                            <button type="button" class="filter-pill" data-h="7d">7D</button>
+                <div class="panel-card shap-panel">
+                    <div class="panel-card-head">
+                        <div class="panel-card-title">
+                            <span class="panel-icon">⚖️</span>
+                            <h3>Why? <span class="panel-sub">SHAP Feature Attribution</span></h3>
+                        </div>
+                        <div class="horizon-switch-strip" id="explain-horizon-tabs">
+                            <button type="button" class="switch-pill active" data-h="1d">1D</button>
+                            <button type="button" class="switch-pill" data-h="3d">3D</button>
+                            <button type="button" class="switch-pill" data-h="5d">5D</button>
+                            <button type="button" class="switch-pill" data-h="7d">7D</button>
                         </div>
                     </div>
-                    <div id="shap-container" class="shap-list">
-                        <div class="placeholder">Select a bank to view feature drivers</div>
+
+                    <div id="shap-container" class="shap-list-box">
+                        <div class="terminal-placeholder">Select a bank to view feature drivers</div>
                     </div>
-                    <div class="narrative-box">
-                        <div class="narrative-title">✨ Quantitative Synthesis</div>
-                        <div id="narrative-container">Select a bank to view explainable synthesis.</div>
+
+                    <!-- BankSightAI × NVIDIA NIM Gemini-Style Deep Explainability Box -->
+                    <div class="nv-gemini-box" id="nvGeminiBox">
+                        <!-- Neon Glowing Animated Line at top (Google Gemini style green aura bar) -->
+                        <div class="nv-gemini-glow-line"></div>
+                        
+                        <!-- Header with glowing NVIDIA Logo & Co-Brand Info -->
+                        <div class="nv-gemini-header">
+                            <div class="nv-gemini-brand">
+                                <div class="nv-gemini-logo-wrap">
+                                    <img src="assets/nvidia-logo-dark.png" alt="NVIDIA" class="nv-gemini-logo-img">
+                                </div>
+                                <div class="nv-gemini-titles">
+                                    <div class="nv-gemini-title-row">
+                                        <h4 class="nv-gemini-title">NVIDIA NIM Neural Explainability</h4>
+                                        <span class="nv-gemini-pill">TENSOR CORE ACCELERATED</span>
+                                    </div>
+                                    <span class="nv-gemini-sub">Why the Walk-Forward ML Model Made This Prediction · Compulsory Rationale</span>
+                                </div>
+                            </div>
+                            <div class="nv-gemini-badges">
+                                <span class="nv-gemini-verdict-badge buy" id="nvVerdictBadge">ACCUMULATE</span>
+                                <span class="nv-gemini-conf-badge" id="nvConfidenceRating">88% CONF</span>
+                            </div>
+                        </div>
+
+                        <!-- Core Metrics Strip (Action, Target, Stop-Loss, Horizon) -->
+                        <div class="nv-gemini-metrics-strip">
+                            <div class="nv-gemini-metric">
+                                <span class="nv-gm-label">TARGET PRICE</span>
+                                <span class="nv-gm-val pos" id="nvTargetPrice">₹--</span>
+                            </div>
+                            <div class="nv-gemini-metric">
+                                <span class="nv-gm-label">STOP-LOSS</span>
+                                <span class="nv-gm-val neg" id="nvStopLoss">₹--</span>
+                            </div>
+                            <div class="nv-gemini-metric">
+                                <span class="nv-gm-label">OPTIMAL HORIZON</span>
+                                <span class="nv-gm-val" id="nvOptimalHorizon">5 - 7 Days</span>
+                            </div>
+                            <div class="nv-gemini-metric">
+                                <span class="nv-gm-label">SYSTEMIC RISK</span>
+                                <span class="nv-gm-val risk-low" id="nvRiskLevel">LOW</span>
+                            </div>
+                        </div>
+
+                        <!-- Gemini-Style AI Synthesis & Compulsory ML Rationale Content -->
+                        <div class="nv-gemini-content-wrap">
+                            <div class="nv-gemini-content-label">
+                                <span class="nv-gemini-sparkle">✦</span>
+                                <b>QUANTITATIVE EXPLANATION &amp; DECISION REASONING:</b>
+                            </div>
+                            <div id="narrative-container" class="nv-gemini-text">
+                                Select a bank and forecast horizon to generate real-time NVIDIA NIM quantitative model explainability.
+                            </div>
+                        </div>
+
+                        <!-- TreeSHAP Catalysts & Downside Protection List -->
+                        <div class="nv-gemini-catalysts-box" id="nvCatalystsBox">
+                            <div class="nv-gemini-cat-title">KEY MODEL CATALYSTS &amp; DRIVERS:</div>
+                            <ul class="nv-gemini-cat-list" id="nvCatalystsList">
+                                <li><span>TreeSHAP attribution identifies primary positive momentum drivers.</span></li>
+                            </ul>
+                        </div>
+
+                        <!-- Footer / Architecture Specs -->
+                        <div class="nv-gemini-footer">
+                            <div class="nv-gemini-footer-left">
+                                <span class="nv-gemini-pulse-dot"></span>
+                                <span>Engine: <b>Meta LLaMA 3.2 NIM</b> · Purged Walk-Forward CV · TreeSHAP</span>
+                            </div>
+                            <a href="/copilot" class="nv-gemini-discuss-link">
+                                <span>Open Dedicated AI Copilot Page →</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- News Intelligence Panel -->
-                <div class="panel">
-                    <div class="panel-title-row">
-                        <h2>News Intelligence</h2>
-                        <span id="news-sentiment-summary" class="news-sent-gauge">Analyzing news...</span>
+                <!-- Live News & Sentiment Intelligence -->
+                <div class="panel-card news-panel">
+                    <div class="panel-card-head">
+                        <div class="panel-card-title">
+                            <span class="panel-icon">📰</span>
+                            <h3>News &amp; Sentiment Stream</h3>
+                        </div>
+                        <span id="news-sentiment-summary" class="sentiment-indicator">Analyzing news...</span>
                     </div>
-                    <div id="news-list" class="news-list">
-                        <!-- JS populated -->
+                    <div id="news-list" class="news-stream-box">
+                        <div class="terminal-placeholder">Loading real-time news radar...</div>
                     </div>
                 </div>
 
-                <!-- Historical Scenario Similarity Panel -->
-                <div class="panel">
-                    <div class="panel-title-row">
-                        <h2>Historical Similarity</h2>
-                        <span class="mc-pill">COSINE REGIME</span>
+                <!-- Historical Cosine Regime Similarity Panel -->
+                <div class="panel-card regime-panel">
+                    <div class="panel-card-head">
+                        <div class="panel-card-title">
+                            <span class="panel-icon">🔄</span>
+                            <h3>Cosine Regime Similarity</h3>
+                        </div>
+                        <span class="tag-regime">ANALOG MATCH</span>
                     </div>
-                    <div id="events-container" class="events-container">
-                        <!-- JS populated -->
+                    <div id="events-container" class="events-stream-box">
+                        <div class="terminal-placeholder">Matching historical market regimes...</div>
                     </div>
                 </div>
-            </div>
+            </aside>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer>
-        <div>Model Status: <span id="perf-metrics" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">Evaluating walk-forward metrics...</span></div>
-        <div>
-            <a href="/manual" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 700; margin-right: 18px;">📖 User Manual &amp; Documentation Portal</a>
-            BankSight AI &copy; 2026. Explainable Market Intelligence for Indian Banking Equities.
+    <!-- Compact Status Footer -->
+    <footer class="terminal-footer">
+        <div class="footer-left">
+            <span class="footer-dot green"></span>
+            <span class="footer-label">Walk-Forward Model Status:</span>
+            <span id="perf-metrics" class="footer-metric">Evaluating cross-validation metrics...</span>
+        </div>
+        <div class="footer-right">
+            <a href="/manual" target="_blank" class="footer-link">📖 Complete User Manual &amp; Architecture Portal</a>
+            <span class="footer-divider">•</span>
+            <span>BankSight AI &copy; 2026. Explainable Market Intelligence for Indian Banking Equities.</span>
         </div>
     </footer>
+
+    <!-- ══════════════════════════════════════════════════════════
+         MODALS: EMAIL RESEARCH REPORT & BACKEND SETTINGS
+         ══════════════════════════════════════════════════════════ -->
 
     <!-- Email Report Modal -->
     <div id="email-modal" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h2>Email Research Briefing</h2>
-                <button id="close-email-modal-btn" class="close-btn" title="Close">&times;</button>
+                <div class="modal-title-row">
+                    <span class="modal-icon">📨</span>
+                    <h2>Email Research Briefing</h2>
+                </div>
+                <button type="button" id="close-email-modal-btn" class="close-btn" title="Close Modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">
-                    Enter your email to receive this stock's publication-grade vector PDF research briefing directly in your inbox.
+                <p class="modal-desc">
+                    Enter your email to receive an institutional publication-grade vector PDF research briefing with full SHAP decomposition directly in your inbox.
                 </p>
                 <form id="email-report-form">
-                    <div style="margin-bottom:16px;">
-                        <label for="report-email" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:6px;color:var(--text-main);">Email Address</label>
-                        <input type="email" id="report-email" class="bank-search-input" placeholder="trader@institution.com" required style="padding: 10px 14px;">
+                    <div class="form-group">
+                        <label for="report-email" class="form-label">Recipient Email Address</label>
+                        <input type="email" id="report-email" class="modal-input" placeholder="trader@institution.com" required>
                     </div>
-                    
-                    <!-- Captcha Box -->
-                    <div class="captcha-box" style="border:1px solid var(--border);border-radius:10px;background:var(--bg-card-hover);padding:14px;display:flex;flex-direction:column;gap:10px;">
-                        <div class="captcha-row" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-                            <div style="display:flex;align-items:center;gap:12px;">
-                                <input type="checkbox" id="captcha-checkbox" style="width:22px;height:22px;cursor:pointer;accent-color:var(--accent);">
-                                <label for="captcha-checkbox" style="font-size:0.85rem;font-weight:700;color:var(--text-main);cursor:pointer;">I am not a robot</label>
-                            </div>
-                            <div class="captcha-logo" style="text-align:center;">
-                                <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" style="width:24px;height:24px;">
-                                <div style="font-size:8px;color:var(--text-dim);margin-top:2px;">reCAPTCHA</div>
-                            </div>
-                        </div>
-                        <div id="captcha-challenge-box" class="hidden" style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px;">
-                            <p style="font-size:0.82rem;margin:0 0 6px 0;font-weight:700;color:var(--text-main);">Human Verification: What is <span id="captcha-question" style="color:var(--accent);font-weight:bold;">5 + 4</span>?</p>
-                            <input type="number" id="captcha-answer" class="bank-search-input" placeholder="Enter answer" style="padding: 8px 12px;">
-                        </div>
-                    </div>
-                    
-                    <button type="submit" id="submit-email-report-btn" class="btn btn-primary" style="width:100%;margin-top:18px;padding:12px;justify-content:center;" disabled>
-                        Send Research Report
+
+                    <button type="submit" id="submit-email-report-btn" class="btn-submit">
+                        <span>Send Institutional Briefing</span>
                     </button>
-                    <div id="email-report-status" style="font-size:0.78rem;margin-top:10px;text-align:center;" class="hidden"></div>
+                    <div id="email-report-status" class="status-msg hidden"></div>
                 </form>
             </div>
         </div>
@@ -359,42 +655,45 @@
 
     <!-- Backend & Cloud Settings Modal -->
     <div id="settings-modal" class="modal-overlay hidden">
-        <div class="modal-card" style="max-width: 520px;">
+        <div class="modal-card modal-settings">
             <div class="modal-header">
-                <h2>Cloud Backend &amp; SMTP Settings</h2>
-                <button class="close-btn" id="close-settings-modal-btn">&times;</button>
+                <div class="modal-title-row">
+                    <span class="modal-icon">⚙️</span>
+                    <h2>Cloud Backend &amp; SMTP Settings</h2>
+                </div>
+                <button type="button" class="close-btn" id="close-settings-modal-btn" title="Close Settings">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+                <p class="modal-desc">
                     Configure your live Python backend URL (e.g. deployed on Render) and test automated Gmail SMTP email dispatching.
                 </p>
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main);">Render Backend API URL</label>
-                    <input type="text" id="api-url-input" class="bank-search-input" placeholder="https://banksight-ai-backend.onrender.com/api" style="padding: 10px 14px;">
-                    <small style="color: var(--text-dim); font-size: 0.75rem; margin-top: 6px; display: block;">
-                        Leave blank to use default <code>/api</code> (recommended for local server or Vercel proxy rewrite).
+                <div class="form-group">
+                    <label for="api-url-input" class="form-label">Render Backend API URL</label>
+                    <input type="text" id="api-url-input" class="modal-input" placeholder="https://banksight-ai-backend.onrender.com/api">
+                    <small class="form-tip">
+                        Leave blank to use default <code>/api</code> (recommended for local Python server or Vercel proxy rewrite).
                     </small>
                 </div>
-                <div style="display: flex; gap: 8px; margin-bottom: 18px;">
-                    <button type="button" id="save-api-url-btn" class="btn btn-primary" style="flex: 1; justify-content: center;">Save &amp; Connect</button>
-                    <button type="button" id="reset-api-url-btn" class="btn btn-secondary">Reset Default</button>
+                <div class="btn-row">
+                    <button type="button" id="save-api-url-btn" class="btn-submit btn-save">Save &amp; Connect</button>
+                    <button type="button" id="reset-api-url-btn" class="btn-secondary">Reset Default</button>
                 </div>
-                
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 18px 0;">
-                
-                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main);">SMTP Email Service Verification</h3>
-                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-                    Verify that your Render environment variables (Gmail SMTP credentials) are properly configured.
+
+                <div class="modal-divider"></div>
+
+                <h3 class="settings-subheading">SMTP Email Service Verification</h3>
+                <p class="modal-desc">
+                    Verify that your environment variables (Gmail SMTP credentials) are properly configured.
                 </p>
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                    <input type="email" id="test-smtp-email" class="bank-search-input" placeholder="Recipient email for test briefing" style="flex: 1; padding: 8px 12px;">
-                    <button type="button" id="test-smtp-btn" class="btn btn-secondary">Test SMTP</button>
+                <div class="smtp-test-row">
+                    <input type="email" id="test-smtp-email" class="modal-input" placeholder="Recipient email for test briefing">
+                    <button type="button" id="test-smtp-btn" class="btn-secondary btn-test-smtp">Test SMTP</button>
                 </div>
-                <div id="settings-status-box" style="padding: 12px; border-radius: 8px; font-size: 0.82rem; background: var(--bg-card-hover); border: 1px solid var(--border); display: none;"></div>
+                <div id="settings-status-box" class="settings-status-box" style="display: none;"></div>
             </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=3.3.0"></script>
 </body>
 </html>
